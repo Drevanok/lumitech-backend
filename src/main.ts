@@ -11,7 +11,7 @@ async function lumintechApp() {
     new FastifyAdapter(),
   );
 
-  // Habilitar CORS si lo necesitas
+  // Enable CORS for the frontend
   // app.enableCors({
   //   origin: process.env.FRONT_URL,
   // });
