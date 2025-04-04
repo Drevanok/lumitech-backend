@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';  // Asegúrate de importar correctamente
+import * as nodemailer from 'nodemailer'; 
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,7 +9,7 @@ export class EmailService {
     private transporter;
 
     constructor(){
-        // Configuración del transporte de correo
+        // Config. nodemailer transporter
         this.transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT,
@@ -20,7 +20,7 @@ export class EmailService {
         });
     }
 
-    // Método para enviar el correo de verificación
+    // Method to send verification email
     async sendVerificationEmail(email: string, name: string, token: string): Promise<void> {
         try {
             const info = await this.transporter.sendMail({
