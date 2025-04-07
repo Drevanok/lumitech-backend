@@ -2,17 +2,17 @@ import { IsString, IsEmail, Length, IsNotEmpty } from 'class-validator';
 
 export class CreateUserDto {
     @IsString()
-    @Length(3, 50)
+    @Length(3, 30)
     @IsNotEmpty()
     user_name: string;
 
     @IsString()
-    @Length(3, 50)
+    @Length(3, 30)
     @IsNotEmpty()
     user_last_name: string;
 
     @IsString()
-    @Length(3, 50)
+    @Length(3, 20)
     @IsNotEmpty()
     user_nickname: string;
 
@@ -21,7 +21,7 @@ export class CreateUserDto {
     user_email: string;
 
     @IsString()
-    @Length(6, 12)
+    @Length(6, 15)
     @IsNotEmpty()
     user_password: string;
 }
