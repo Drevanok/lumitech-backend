@@ -41,4 +41,22 @@ export class EmailService {
             throw new Error('No se pudo enviar el correo de verificación.');
         }
     }
+
+    async sendRecoveryEmail(email: string, resetLink: string): Promise <void> {
+        try {
+            const info = await this.transporter.sendMail({
+                from: `"Lumitech" <${process.env.EMAIL_USER}>`,
+                to: email,
+                subject: "Recuperación de contraseña en Lumitech",
+                html: `<p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para restablecerla:</p>
+                <a href="${resetLink}">Restablecer contraseña</a>
+                <p>Si no solicitaste el restablecimiento de contraseña, ignora este correo.</p>`
+            });
+
+            console.log('Correo de recuperacion enviado: ', info.messageId)
+        } catch (error) {
+            console.log('Error enviando el correo de recuperacion: ', error)
+            throw new Error('No se pudo enviar el correo de recuperacion')
+        }
+    }
 }

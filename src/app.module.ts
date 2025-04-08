@@ -1,8 +1,8 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './models/user/user.module';
-import * as dotenv from 'dotenv'
-import { CheckAuthMiddleware } from './middleware/check-auth.middleware';
+import * as dotenv from 'dotenv';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 dotenv.config();
 
@@ -23,10 +23,4 @@ dotenv.config();
     UserModule,
   ],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer){
-    consumer
-      .apply(CheckAuthMiddleware)
-      .forRoutes({path: 'ruta-protegida', method: RequestMethod.ALL})
-  }
-}
+export class AppModule {}

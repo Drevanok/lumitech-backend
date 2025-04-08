@@ -61,4 +61,48 @@ export class UserService {
     throw new Error('Error interno al verificar el token');
     }
   }
+
+  async forgetPassword(email: string): Promise<{ msg: string }> {
+    const resetToken = uuidv4(); 
+
+    await this.dataSource.query(
+      'CALL generate_reset_token(?, ?, @expiration_time)',
+      [email, resetToken]
+    );
+  
+  
+    const resultExpiration = await this.dataSource.query('SELECT @expiration_time AS expiration_time');
+    const expirationTime = resultExpiration[0].expiration_time;
+  
+    if (!expirationTime) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    console.log(`Este es tu token para restablecer tu password ${resetToken}`)
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await this.emailService.sendRecoveryEmail(email, resetLink);
+  
+    return { msg: 'Se ha enviado un enlace de recuperación a tu correo' };
+}
+
+
+  async resetPassword(token: string, newPassword: string): Promise<{ msg: string }> {
+    
+    //Hash new pass
+    const hashedPassword = await hash(newPassword, 10);
+  
+    const res = await this.dataSource.query('CALL reset_user_password(?, ?, @result_message)', [token, hashedPassword]);
+  
+  
+    const messageResult = await this.dataSource.query('SELECT @result_message AS result_message');
+    const message = messageResult[0].result_message;
+  
+    if (message === 'Token invalido' || message === 'Token expirado') {
+      throw new BadRequestException(message);
+    }
+  
+    return { msg: message };
+  }
+
 }

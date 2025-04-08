@@ -23,6 +23,7 @@ dotenv.config();
     UserController,
     ConfirmEmailController,
     AuthController,  
+    
   ],
   providers: [
     UserService,
