@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import {EmailService} from '../services/email/email.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import {EmailService} from '../../auth/services/email.service';
+import { CreateUserDto } from '../../auth/dto/create-user.dto';
 import { hash } from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -104,5 +104,4 @@ export class UserService {
   
     return { msg: message };
   }
-
 }

@@ -1,5 +1,5 @@
-import {Controller, Get, Param, BadRequestException, HttpCode, HttpStatus} from '@nestjs/common';
-import {UserService} from '../services/user.service';
+import {Controller, Get, Param, HttpCode, HttpStatus} from '@nestjs/common';
+import {UserService} from '../../user/services/user.service';
 
 @Controller('user')
 export class ConfirmEmailController {

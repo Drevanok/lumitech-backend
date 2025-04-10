@@ -1,8 +1,6 @@
-// auth.controller.ts
-
 import { Controller, Post, Body, HttpCode, HttpStatus, HttpException, UseGuards, Request, Get } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
   
 @Controller('user/auth')
@@ -14,7 +12,9 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto): Promise<any> {
     const { email, nickname, password } = loginDto;
 
-    if (!email && !nickname) {
+    const loginField = email || nickname;
+
+    if (!loginField) {
       throw new HttpException('Email o nickname son requeridos', HttpStatus.BAD_REQUEST);
     }
 
@@ -23,8 +23,6 @@ export class AuthController {
     }
 
     try {
-      const loginField = (email || nickname) as string;
-
       const { token, user } = await this.authService.login(loginField, password);
 
       return {
@@ -32,6 +30,7 @@ export class AuthController {
         token,
         user,
       };
+
     } catch (error) {
       console.error('Error en login controller:', error);
       throw new HttpException(

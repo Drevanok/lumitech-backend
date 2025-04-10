@@ -11,7 +11,32 @@ export class AuthService {
   ) {}
 
   async login(nicknameOrEmail: string, password: string) {
+    const resultData = await this.validateUser(nicknameOrEmail);
+    const { password_hash, verified, result: procedureResult } = resultData;
 
+
+    if (procedureResult === 'USER_NOT_FOUND') {
+      throw new HttpException('El nickname o correo no existen.', HttpStatus.NOT_FOUND);
+    }
+
+    if (!(await this.validatePassword(password, password_hash))) {
+      throw new HttpException('Contraseña incorrecta.', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (verified === 0) {
+      throw new HttpException('Usuario no verificado.', HttpStatus.FORBIDDEN);
+    }
+
+    const user = await this.getUser(nicknameOrEmail);
+    const token = this.generateJwtToken(user);
+
+    return {
+      token,
+      user: this.buildUserResponse(user),
+    };
+  }
+
+  private async validateUser(nicknameOrEmail: string) {
     await this.dataSource.query(`
       CALL validate_session(?, @p_password_hash, @p_user_verified, @p_result);
     `, [nicknameOrEmail]);
@@ -23,30 +48,18 @@ export class AuthService {
         @p_result AS result;
     `);
 
-
     if (!resultData || !resultData[0]) {
       throw new HttpException('Error al obtener datos de sesión.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    const { password_hash, verified, result: procedureResult } = resultData[0];
+    return resultData[0];
+  }
 
-    // if user not found
-    if (procedureResult === 'USER_NOT_FOUND') {
-      throw new HttpException('El nickname o correo no existen.', HttpStatus.NOT_FOUND);
-    }
+  private async validatePassword(password: string, password_hash: string) {
+    return compare(password, password_hash);
+  }
 
-    // Validate password
-    const isPasswordValid = await compare(password, password_hash);
-    if (!isPasswordValid) {
-      throw new HttpException('Contraseña incorrecta.', HttpStatus.UNAUTHORIZED);
-    }
-
-    // validate if user is verified
-    if (verified === 0) {
-      throw new HttpException('Usuario no verificado.', HttpStatus.FORBIDDEN);
-    }
-
-    // search user to generate token
+  private async getUser(nicknameOrEmail: string) {
     const [user] = await this.dataSource.query(`
       SELECT uuid, user_name, user_nickname, user_email 
       FROM user 
@@ -58,18 +71,20 @@ export class AuthService {
       throw new HttpException('Error interno. Usuario no encontrado después de validar.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // generate token
-    const payload = { uuid: user.uuid };
-    const token = this.jwtService.sign(payload);
+    return user;
+  }
 
+  private generateJwtToken(user: any) {
+    const payload = { uuid: user.uuid };
+    return this.jwtService.sign(payload);
+  }
+
+  private buildUserResponse(user: any) {
     return {
-      token,
-      user: {
-        uuid: user.uuid,
-        name: user.user_name,
-        nickname: user.user_nickname,
-        email: user.user_email,
-      },
+      uuid: user.uuid,
+      name: user.user_name,
+      nickname: user.user_nickname,
+      email: user.user_email,
     };
   }
 }

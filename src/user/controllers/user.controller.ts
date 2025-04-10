@@ -4,12 +4,11 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Param,
   BadRequestException,
 } from '@nestjs/common';
 
 import { UserService } from '../services/user.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { CreateUserDto } from '../../auth/dto/create-user.dto';
 
 @Controller('user') // Prefix route
 export class UserController {
