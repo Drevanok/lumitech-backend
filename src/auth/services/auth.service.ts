@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import { compare } from 'bcryptjs';
+import { LoginDto } from '../dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -10,24 +11,44 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async login(nicknameOrEmail: string, password: string) {
-    const resultData = await this.validateUser(nicknameOrEmail);
-    const { password_hash, verified, result: procedureResult } = resultData;
+  async login(loginDto: LoginDto) {
+    const { email, nickName, password } = loginDto;
 
+    const loginField = email || nickName;
+
+    if (!loginField) {
+      throw new HttpException(
+        'Email o nickName son requeridos',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (!password) {
+      throw new HttpException('Password es requerido', HttpStatus.BAD_REQUEST);
+    }
+
+    const resultData = await this.validateUser(loginField);
+    const { passwordHash, isVerified, result: procedureResult } = resultData;
 
     if (procedureResult === 'USER_NOT_FOUND') {
-      throw new HttpException('El nickname o correo no existen.', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'El nickName o correo no existen.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
-    if (!(await this.validatePassword(password, password_hash))) {
-      throw new HttpException('Contraseña incorrecta.', HttpStatus.UNAUTHORIZED);
+    if (!(await this.validatePassword(password, passwordHash))) {
+      throw new HttpException(
+        'Contraseña incorrecta.',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
-    if (verified === 0) {
+    if (isVerified === 0) {
       throw new HttpException('Usuario no verificado.', HttpStatus.FORBIDDEN);
     }
 
-    const user = await this.getUser(nicknameOrEmail);
+    const user = await this.getUser(loginField);
     const token = this.generateJwtToken(user);
 
     return {
@@ -36,39 +57,47 @@ export class AuthService {
     };
   }
 
-  private async validateUser(nicknameOrEmail: string) {
-    await this.dataSource.query(`
-      CALL validate_session(?, @p_password_hash, @p_user_verified, @p_result);
-    `, [nicknameOrEmail]);
+  private async validateUser(nickNameOrEmail: string) {
+    await this.dataSource.query(
+      `CALL validate_session(?, @p_password_hash, @p_user_verified, @p_result);`,
+      [nickNameOrEmail],
+    );
 
-    const resultData = await this.dataSource.query(`
-      SELECT 
-        @p_password_hash AS password_hash, 
-        @p_user_verified AS verified, 
-        @p_result AS result;
-    `);
+    const [resultData] = await this.dataSource.query(
+      `SELECT 
+        @p_password_hash AS passwordHash, 
+        @p_user_verified AS isVerified, 
+        @p_result AS result;`,
+    );
 
-    if (!resultData || !resultData[0]) {
-      throw new HttpException('Error al obtener datos de sesión.', HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!resultData) {
+      throw new HttpException(
+        'Error al obtener datos de sesión.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    return resultData[0];
+    return resultData;
   }
 
-  private async validatePassword(password: string, password_hash: string) {
-    return compare(password, password_hash);
+  private async validatePassword(password: string, passwordHash: string) {
+    return compare(password, passwordHash);
   }
 
-  private async getUser(nicknameOrEmail: string) {
-    const [user] = await this.dataSource.query(`
-      SELECT uuid, user_name, user_nickname, user_email 
-      FROM user 
-      WHERE user_nickname = ? OR user_email = ?
-      LIMIT 1;
-    `, [nicknameOrEmail, nicknameOrEmail]);
+  private async getUser(nickNameOrEmail: string) {
+    const [user] = await this.dataSource.query(
+      `SELECT uuid, user_name AS userName, user_nickname AS nickName, user_email AS email 
+       FROM user 
+       WHERE user_nickname = ? OR user_email = ?
+       LIMIT 1;`,
+      [nickNameOrEmail, nickNameOrEmail],
+    );
 
     if (!user) {
-      throw new HttpException('Error interno. Usuario no encontrado después de validar.', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Error interno. Usuario no encontrado después de validar.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return user;
@@ -82,9 +111,9 @@ export class AuthService {
   private buildUserResponse(user: any) {
     return {
       uuid: user.uuid,
-      name: user.user_name,
-      nickname: user.user_nickname,
-      email: user.user_email,
+      name: user.userName,
+      nickName: user.nickName,
+      email: user.email,
     };
   }
 }

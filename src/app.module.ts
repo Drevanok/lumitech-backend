@@ -15,8 +15,8 @@ dotenv.config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: false, // No sincronizas las entidades
-      logging: true, // Puede ser útil para depuración
+      synchronize: false, 
+      logging: true, 
     }),
     UserModule,
     AuthModule,

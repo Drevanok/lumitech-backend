@@ -1,6 +1,11 @@
 import { IsString, Length, IsNotEmpty, Matches } from 'class-validator';
 
-export class ResetPasswordDto {
+export class ChangePasswordDto {
+
+  @IsString()
+  @IsNotEmpty()
+  currentPassword: string;
+
   @IsString()
   @Length(8, 15, {
     message: 'La contraseña debe tener entre 8 y 15 caracteres.',

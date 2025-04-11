@@ -5,10 +5,18 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Param,
+  HttpException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../../auth/dto/create-user.dto';
+import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Controller('user') // Prefix route
 export class UserController {
@@ -24,23 +32,26 @@ export class UserController {
   }
 
   @Post('forget-password')
-  async forgetPassword(@Body('email') email: string): Promise<{ msg: string }> {
-    try {
-      return await this.userService.forgetPassword(email);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+  async forgetPassword(@Body('email') email: string) {
+    return this.userService.forgetPassword(email);
   }
 
-  @Post('reset-password')
+  @Post('reset-password/:token')
   async resetPassword(
-    @Body('token') token: string,
-    @Body('newPassword') newPassword: string,
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<{ msg: string }> {
-    try {
-      return await this.userService.resetPassword(token, newPassword);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+    return this.userService.resetPassword(token, resetPasswordDto);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @Req() req: { user: JwtPayload },
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const uuid = req.user.uuid;
+    return this.userService.changePassword(uuid, changePasswordDto);
   }
 }

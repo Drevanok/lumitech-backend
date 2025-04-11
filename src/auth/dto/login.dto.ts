@@ -1,3 +1,4 @@
+// login.dto.ts
 import {
   IsString,
   IsEmail,
@@ -11,23 +12,23 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-@ValidatorConstraint({ name: 'eitherEmailOrNickname', async: false })
-class EitherEmailOrNicknameConstraint implements ValidatorConstraintInterface {
+@ValidatorConstraint({ name: 'eitherEmailOrNickName', async: false })
+class EitherEmailOrNickNameConstraint implements ValidatorConstraintInterface {
   validate(_: any, args: ValidationArguments) {
     const obj = args.object as any;
-    return !!(obj.email || obj.nickname);
+    return !!(obj.email || obj.nickName);
   }
 
   defaultMessage() {
-    return 'Debes proporcionar al menos el email o el nickname.';
+    return 'Debes proporcionar al menos el email o el nickName.';
   }
 }
 
 export class LoginDto {
   @IsOptional()
   @IsString()
-  @MinLength(3, { message: 'El nickname debe tener al menos 3 caracteres.' })
-  nickname?: string;
+  @MinLength(3, { message: 'El nickName debe tener al menos 3 caracteres.' })
+  nickName?: string;
 
   @IsOptional()
   @IsEmail({}, { message: 'El correo electrónico no es válido.' })
@@ -38,6 +39,6 @@ export class LoginDto {
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })
   password: string;
 
-  @Validate(EitherEmailOrNicknameConstraint)
-  checkEitherEmailOrNickname: boolean;
+  @Validate(EitherEmailOrNickNameConstraint)
+  checkEitherEmailOrNickName: boolean;
 }
