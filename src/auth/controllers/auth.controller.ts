@@ -4,7 +4,6 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  HttpException,
   UseGuards,
   Request,
   Get,
@@ -19,22 +18,16 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<any> {
-    try {
-      const { token, user } = await this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+  ): Promise<LoginResponse & { msg: string }> {
+    const { token, user } = await this.authService.login(loginDto);
 
-      return {
-        msg: 'Inicio de sesión exitoso',
-        token,
-        user,
-      };
-    } catch (error) {
-      console.error('Error en login controller:', error);
-      throw new HttpException(
-        error.response || 'Error en el proceso de autenticación',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return {
+      msg: 'Inicio de sesión exitoso',
+      token,
+      user,
+    };
   }
 
   @Get('profile')

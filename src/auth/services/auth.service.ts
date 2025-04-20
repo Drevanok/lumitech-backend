@@ -11,7 +11,7 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<LoginResponse> {
     const { email, nickName, password } = loginDto;
 
     const loginField = email || nickName;
@@ -70,10 +70,10 @@ export class AuthService {
         @p_result AS result;`,
     );
 
-    if (!resultData) {
+    if (!resultData || !('passwordHash' in resultData)) {
       throw new HttpException(
-        'Error al obtener datos de sesión.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        'Error al validar las credenciales.',
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -81,9 +81,16 @@ export class AuthService {
   }
 
   private async validatePassword(password: string, passwordHash: string) {
-    return compare(password, passwordHash);
+    try {
+      return await compare(password, passwordHash);
+    } catch (err) {
+      throw new HttpException(
+        'Error al validar contraseña.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
-
+  
   private async getUser(nickNameOrEmail: string) {
     const [user] = await this.dataSource.query(
       `SELECT uuid, user_name AS userName, user_nickname AS nickName, user_email AS email 
@@ -95,7 +102,7 @@ export class AuthService {
 
     if (!user) {
       throw new HttpException(
-        'Error interno. Usuario no encontrado después de validar.',
+        'Hubo un error al procesar el inicio de sesión.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

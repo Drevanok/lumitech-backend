@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
 
@@ -43,7 +43,8 @@ export class EmailService {
       );
     } catch (error) {
       console.error('Error enviando el correo: ', error);
-      throw new Error('No se pudo enviar el correo de verificación.');
+
+      throw new HttpException('No se pudo enviar el correo de verificación.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -60,8 +61,8 @@ export class EmailService {
 
       console.log('Correo de recuperacion enviado: ', info.messageId);
     } catch (error) {
-      console.log('Error enviando el correo de recuperacion: ', error);
-      throw new Error('No se pudo enviar el correo de recuperacion');
+      console.error('Error enviando el correo de recuperación: ', error);
+      throw new HttpException('No se pudo enviar el correo de recuperación.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

@@ -15,8 +15,9 @@ import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../../auth/dto/create-user.dto';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
+import { ChangePasswordDto, ChangeUserLastNameDto } from 'src/auth/dto/modified-data-user.dto';
 import { JwtPayload } from 'jsonwebtoken';
+import { ChangeUserNameDto } from 'src/auth/dto/modified-data-user.dto';
 
 @Controller('user') // Prefix route
 export class UserController {
@@ -53,5 +54,27 @@ export class UserController {
   ) {
     const uuid = req.user.uuid;
     return this.userService.changePassword(uuid, changePasswordDto);
+  }
+
+  @Post('change-name')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async changeUserName(
+    @Req() req: {user: JwtPayload},
+    @Body() changeUserNameDto: ChangeUserNameDto
+  ){
+    const uuid = req.user.uuid
+    return this.userService.changeUserName(uuid, changeUserNameDto)
+  }
+
+  @Post('change-lastname')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async changeUserLastname(
+    @Req() req: {user: JwtPayload},
+    @Body() changeUserLastnameDto: ChangeUserLastNameDto
+  ){
+    const uuid = req.user.uuid
+    return this.userService.changeUserLastName(uuid, changeUserLastnameDto);
   }
 }

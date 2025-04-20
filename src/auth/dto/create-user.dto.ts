@@ -10,11 +10,17 @@ export class CreateUserDto {
   @IsString()
   @Length(3, 50, { message: 'El nombre debe tener entre 3 y 50 caracteres.' })
   @IsNotEmpty({ message: 'El nombre no puede estar vacío.' })
+  @Matches(/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]{3,50}$/, {
+    message: 'El nombre solo puede contener letras y espacios.',
+  })
   userName: string;
 
   @IsString()
   @Length(3, 50, { message: 'El apellido debe tener entre 3 y 50 caracteres.' })
   @IsNotEmpty({ message: 'El apellido no puede estar vacío.' })
+  @Matches(/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]{3,50}$/, {
+    message: 'El apellido solo puede contener letras y espacios.',
+  })
   userLastName: string;
 
   @IsString()
