@@ -3,6 +3,8 @@ import {
     Length,
     IsNotEmpty,
     Matches,
+    IsOptional,
+    MinLength,
   } from 'class-validator';
 
 //validator change user name
@@ -47,5 +49,12 @@ export class ChangePasswordDto {
   })
   @IsNotEmpty({ message: 'La contraseña no puede estar vacía.' })
   userNewPassword: string;
+}
+
+export class ChangeUserNickNameDto {
+    @IsOptional()
+    @IsString()
+    @MinLength(3, { message: 'El nickName debe tener al menos 3 caracteres.' })
+    nickName?: string;
 }
 

@@ -1,10 +1,7 @@
-interface LoginResponse {
-    token: string;
-    user: {
-      uuid: string;
-      name: string;
-      nickName: string;
-      email: string;
-    };
-  }
-  
+export interface LoginResponse {
+  token: string;
+  user: {
+    uuid: string;
+    email: string;
+  };
+}

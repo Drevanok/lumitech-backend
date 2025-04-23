@@ -3,6 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import { compare } from 'bcryptjs';
 import { LoginDto } from '../dto/login.dto';
+import { LoginResponse } from '../interfaces/login-response';
+import { userLogin } from '../interfaces/user-login.interface';
+
 
 @Injectable()
 export class AuthService {
@@ -28,8 +31,9 @@ export class AuthService {
     }
 
     const resultData = await this.validateUser(loginField);
+    console.log(resultData)
     const { passwordHash, isVerified, result: procedureResult } = resultData;
-
+    
     if (procedureResult === 'USER_NOT_FOUND') {
       throw new HttpException(
         'El nickName o correo no existen.',
@@ -37,16 +41,18 @@ export class AuthService {
       );
     }
 
-    if (!(await this.validatePassword(password, passwordHash))) {
+    const validatePass = await this.validatePassword(password, passwordHash);
+    await this.validatePassword(password, passwordHash)
+    if (!validatePass) {
       throw new HttpException(
         'Contraseña incorrecta.',
         HttpStatus.UNAUTHORIZED,
       );
-    }
+    };
 
-    if (isVerified === 0) {
+    if (Number(isVerified) === 0) {
       throw new HttpException('Usuario no verificado.', HttpStatus.FORBIDDEN);
-    }
+    };
 
     const user = await this.getUser(loginField);
     const token = this.generateJwtToken(user);
@@ -110,16 +116,14 @@ export class AuthService {
     return user;
   }
 
-  private generateJwtToken(user: any) {
-    const payload = { uuid: user.uuid };
+  private generateJwtToken(user: userLogin) {
+    const payload = {uuid: user.uuid};
     return this.jwtService.sign(payload);
   }
 
-  private buildUserResponse(user: any) {
+  private buildUserResponse(user: userLogin) {
     return {
       uuid: user.uuid,
-      name: user.userName,
-      nickName: user.nickName,
       email: user.email,
     };
   }

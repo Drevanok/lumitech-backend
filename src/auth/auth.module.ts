@@ -1,12 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { UserModule } from 'src/user/user.module'; // Asegúrate de importar UserModule
+import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './services/auth.service';
-import { ConfirmEmailController } from './controllers/confirm-email.controller';
 import { EmailService } from './services/email.service';
 import { AuthController } from './controllers/auth.controller';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     }),
     forwardRef(() => UserModule),
   ],
-  controllers: [AuthController, ConfirmEmailController],
+  controllers: [AuthController],
   providers: [AuthService, EmailService, JwtAuthGuard],
   exports: [AuthService, EmailService, JwtAuthGuard, JwtModule],
 })

@@ -4,13 +4,10 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UseGuards,
-  Request,
-  Get,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { LoginDto } from '../dto/login.dto';
+import { LoginResponse } from '../interfaces/login-response';
 
 @Controller('user/auth')
 export class AuthController {
@@ -27,16 +24,6 @@ export class AuthController {
       msg: 'Inicio de sesión exitoso',
       token,
       user,
-    };
-  }
-
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  async getProfile(@Request() req: any): Promise<any> {
-    return {
-      msg: 'Perfil accesible solo para usuarios autenticados',
-      user: req.user,
     };
   }
 }

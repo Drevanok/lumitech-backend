@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { EmailService } from '../../auth/services/email.service';
@@ -13,8 +14,10 @@ import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import {
   ChangePasswordDto,
   ChangeUserLastNameDto,
+  ChangeUserNickNameDto,
 } from 'src/auth/dto/modified-data-user.dto';
 import { ChangeUserNameDto } from 'src/auth/dto/modified-data-user.dto';
+import { userInfo } from 'src/auth/interfaces/user-info.interface';
 
 @Injectable()
 export class UserService {
@@ -23,6 +26,7 @@ export class UserService {
     private readonly emailService: EmailService,
   ) {}
 
+  //function register/create new user in app
   async createUser(createUserDto: CreateUserDto): Promise<void> {
     const { userName, userLastName, userNickName, userEmail, userPassword } =
       createUserDto;
@@ -56,6 +60,7 @@ export class UserService {
       userUUID,
     ]);
 
+
     //Send verification email
     await this.emailService.sendVerificationEmail(
       userEmail,
@@ -63,6 +68,8 @@ export class UserService {
       verificationToken,
     );
   }
+
+  //function verification user with email
   async confirmUserEmail(token: string): Promise<{ msg: string }> {
     try {
       //validate token
@@ -110,42 +117,101 @@ export class UserService {
     }
   }
 
+  async resendVerificationEmail(email:string): Promise<{msg: string}>{
+    const newToken = uuidv4();
+
+    await this.dataSource.query(
+      'CALL resend_verification_token(?, ?, @found_flag, @verified_flag, @user_name_out)',
+      [email, newToken],
+    );
+
+    const [flags] = await this.dataSource.query(
+      'SELECT @found_flag AS found, @verified_flag AS verified, @user_name_out AS userName'
+    );
+
+    const {found, verified, userName} = flags;
+
+    if(found === 0 || found === '0'){
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if(verified === 1 || verified === "1"){
+      throw new BadRequestException('La cuenta ya esta verificada');
+    }
+
+    await this.emailService.sendVerificationEmail(email, userName || 'Usuario', newToken);
+    
+    return {msg: 'Correo de verificacion enviado'};
+  };
+
+
+  //get user profile after authenticate login
+  async getUserProfile(uuid: string): Promise<userInfo> {
+    const [searchUser] = await this.dataSource.query(
+      `CALL get_user_by_uuid(?)`,
+      [uuid],
+    );
+
+    console.log(searchUser);
+
+    if (!searchUser || !searchUser[0]) {
+      throw new HttpException('Usuario no encontrado.', HttpStatus.NOT_FOUND);
+    }
+
+    const user = searchUser[0];
+    return {
+      name: user.userName,
+      userLastName: user.userLastName,
+      verify: user.verify,
+      email: user.email,
+      userNickName: user.userNickName,
+    };
+  }
+
   async forgetPassword(email: string): Promise<{ msg: string }> {
     const resetToken = uuidv4();
-
+  
     try {
-      //Call procedure generate recovery token
-
+      // Llamar procedimiento sin usar expiration_time
       await this.dataSource.query(
-        'CALL generate_reset_token(?, ?, @expiration_time)',
+        'CALL generate_reset_token(?, ?, @verified_flag, @found_flag, @user_name)',
         [email, resetToken],
       );
-
-      const resultExpiration = await this.dataSource.query(
-        'SELECT @expiration_time AS expiration_time',
+  
+      const [result] = await this.dataSource.query(
+        'SELECT @verified_flag AS verified, @found_flag AS found, @user_name AS userName',
       );
-      const expirationTime = resultExpiration[0].expiration_time;
+  
+      const { verified, found, userName } = result;
 
-      if (!expirationTime) {
+      //verify if user exist
+      if (found === 0 || found === '0') {
         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
       }
 
-      // Generate link recovery
-      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+      //verify if account user is verified
+      if (verified === 0 || verified === '0') {
+        throw new HttpException('Tu cuenta no está verificada', HttpStatus.FORBIDDEN);
+      }
 
-      // Send email link
-      await this.emailService.sendRecoveryEmail(email, resetLink);
-
+      //send email
+      await this.emailService.sendRecoveryEmail(email, userName || 'Usuario', resetToken);
+  
       console.log(resetToken);
       return { msg: 'Se ha enviado un enlace de recuperación a tu correo' };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+  
       throw new HttpException(
         'Error al generar el enlace de recuperación',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
+  
+  //function reset password, save new password
   async resetPassword(
     token: string,
     resetPasswordDto: ResetPasswordDto,
@@ -202,6 +268,7 @@ export class UserService {
     return { msg: resultPasswordReset };
   }
 
+  //service user authenticate, change password
   async changePassword(
     uuid: string,
     changePasswordDto: ChangePasswordDto,
@@ -248,6 +315,7 @@ export class UserService {
     return { msg: resultUpdatePassword[0]?.msg };
   }
 
+  //service user authenticate, change user name
   async changeUserName(
     uuid: string,
     changeUserNameDto: ChangeUserNameDto,
@@ -273,6 +341,7 @@ export class UserService {
     }
   }
 
+  //user authenticate user, change user last name
   async changeUserLastName(
     uuid: string,
     changeUserLastNameDto: ChangeUserLastNameDto,
@@ -293,6 +362,31 @@ export class UserService {
     } catch (error) {
       throw new HttpException(
         'Error al actualizar el apellido',
+        HttpStatus.NOT_MODIFIED,
+      );
+    }
+  }
+
+  async changeUserNickName(
+    uuid: string,
+    changeUserNickNameDto: ChangeUserNickNameDto,
+  ): Promise<{ msg: string }> {
+    const { nickName } = changeUserNickNameDto;
+
+    try {
+      await this.dataSource.query('CALL change_user_nickname(?, ?, @message)', [
+        uuid,
+        nickName,
+      ]);
+
+      const resultUpdateNickName = await this.dataSource.query(
+        'SELECT @message AS msg',
+      );
+
+      return { msg: resultUpdateNickName[0]?.msg };
+    } catch (error) {
+      throw new HttpException(
+        'Error al actualizar el nickname',
         HttpStatus.NOT_MODIFIED,
       );
     }
