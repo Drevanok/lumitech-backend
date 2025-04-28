@@ -32,15 +32,14 @@ export class RosetaService {
   async sendUUID(uuid: string): Promise<{ msg: string }> {
     
     try {
-      // Aquí haces la solicitud HTTP POST al ESP32
-      const apiUrl = `http://${ip_rosetta}/set-uuid`;  // Reemplaza <ESP32_IP> por la IP de tu ESP32
+      
+      const apiUrl = `http://${ip_rosetta}/set-uuid`;  //url ESP32 dinamic
 
-      // Enviamos el UUID al ESP32
       const response = await lastValueFrom(
-        this.httpService.post(apiUrl, { uuid })  // Aquí envías el UUID en el cuerpo de la solicitud
+        this.httpService.post(apiUrl, { uuid }) //send uuid to ESP32
       );
 
-      // Suponiendo que el ESP32 responde con un mensaje
+      //check response ESP32
       console.log("Respuesta del ESP32:", response.data);
 
       return { msg: 'UUID enviado correctamente' };
