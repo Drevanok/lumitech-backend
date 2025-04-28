@@ -3,14 +3,9 @@ import { DataSource } from 'typeorm';
 import { CreateRosettaDto } from '../dto/create-rosetta.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { ReceivedDataRosettaDto } from '../dto/received-data.dto';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 
 let ip_rosetta = '';
-let mac_rosetta = '';
-let ssdi_wifi = '';
-let password_wifi = '';
-let owner_uuid = '';
 
 @Injectable()
 export class RosetaService {
@@ -50,28 +45,16 @@ export class RosetaService {
     }
   }
 
-  async receivedDataRosetta(receivedDataRosettaDto: ReceivedDataRosettaDto): Promise<{ msg: string }> {
-    const { rosette_mac, wifi_ssid, wifi_password, uuid_owner} = receivedDataRosettaDto
-
-    mac_rosetta = rosette_mac
-    ssdi_wifi = wifi_ssid
-    password_wifi = wifi_password
-    owner_uuid = uuid_owner
-    console.log('Datos recibidos en el backend:', rosette_mac, wifi_ssid, wifi_password, uuid_owner);
-    console.log('Datos guardados:', mac_rosetta, ssdi_wifi, password_wifi, owner_uuid);
-    return { msg: 'Datos recibidos correctamente' };
-  }
-
   async registerRosetta(
     createRosettaDto: CreateRosettaDto,
   ): Promise<{ msg: string }> {
-    const { rosette_mac, wifi_ssid, wifi_password} =
+    const { rosette_mac, wifi_ssid, wifi_password, uuid_owner} =
       createRosettaDto;
 
     try {
       await this.dataSource.query(
         'CALL register_rosette(?, ?, ?, ?, @p_message)',
-        [rosette_mac, wifi_ssid, wifi_password],
+        [rosette_mac, wifi_ssid, wifi_password, uuid_owner],
       );
 
       const result = await this.dataSource.query(

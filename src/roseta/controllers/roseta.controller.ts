@@ -9,10 +9,8 @@ import {
 } from '@nestjs/common';
 import { RosetaService } from '../services/roseta.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-//import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 import { JwtPayload } from 'jsonwebtoken';
 import { CreateRosettaDto } from '../dto/create-rosetta.dto';
-import { ReceivedDataRosettaDto } from '../dto/received-data.dto';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 
 @Controller('roseta')
@@ -33,15 +31,7 @@ export class RosetaController {
     const userUuid = req.user.uuid;
     return await this.rosetaService.sendUUID(userUuid);
   }
-
-  @Post('received-data')
-  @HttpCode(HttpStatus.OK)
-  async receivedData(
-    @Body() receivedDataRosettaDto: ReceivedDataRosettaDto,
-  ): Promise<{ msg: string }> {
-    return await this.rosetaService.receivedDataRosetta(receivedDataRosettaDto);
-  }
-
+  
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async registerRosetta(@Body() createRosettaDto: CreateRosettaDto) {

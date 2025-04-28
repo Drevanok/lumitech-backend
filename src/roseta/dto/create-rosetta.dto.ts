@@ -12,5 +12,9 @@ export class CreateRosettaDto {
     @IsString()
     @IsNotEmpty()
     wifi_password: string;
+
+    @IsNotEmpty()
+    uuid_owner: string;
   }
+
   
