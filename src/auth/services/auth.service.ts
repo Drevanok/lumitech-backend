@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import { compare } from 'bcryptjs';
 import { LoginDto } from '../dto/login.dto';
 import { LoginResponse } from '../interfaces/login-response';
-import { userLogin } from '../interfaces/user-login.interface';
+import { UserLogin } from '../interfaces/user-login.interface';
 
 
 @Injectable()
@@ -116,12 +116,12 @@ export class AuthService {
     return user;
   }
 
-  private generateJwtToken(user: userLogin) {
+  private generateJwtToken(user: UserLogin) {
     const payload = {uuid: user.uuid};
     return this.jwtService.sign(payload);
   }
 
-  private buildUserResponse(user: userLogin) {
+  private buildUserResponse(user: UserLogin) {
     return {
       uuid: user.uuid,
       email: user.email,

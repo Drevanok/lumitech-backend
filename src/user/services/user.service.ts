@@ -7,17 +7,17 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { EmailService } from '../../auth/services/email.service';
-import { CreateUserDto } from '../../auth/dto/create-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { hash, compare } from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
 import {
   ChangePasswordDto,
   ChangeUserLastNameDto,
   ChangeUserNickNameDto,
-} from 'src/auth/dto/modified-data-user.dto';
-import { ChangeUserNameDto } from 'src/auth/dto/modified-data-user.dto';
-import { userInfo } from 'src/auth/interfaces/user-info.interface';
+  ChangeUserNameDto
+} from '../dto/modified-data-user.dto';
+import { UserInfo } from '../../auth/interfaces/user-info.interface';
 
 @Injectable()
 export class UserService {
@@ -146,7 +146,7 @@ export class UserService {
 
 
   //get user profile after authenticate login
-  async getUserProfile(uuid: string): Promise<userInfo> {
+  async getUserProfile(uuid: string): Promise<UserInfo> {
     const [searchUser] = await this.dataSource.query(
       `CALL get_user_by_uuid(?)`,
       [uuid],

@@ -1,4 +1,4 @@
-export class userInfo {
+export class UserInfo {
     name: string;
     userLastName: string;
     verify: Number;

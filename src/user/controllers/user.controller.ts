@@ -13,24 +13,21 @@ import {
 } from '@nestjs/common';
 
 import { UserService } from '../services/user.service';
-import { CreateUserDto } from '../../auth/dto/create-user.dto';
-import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import {
   ChangePasswordDto,
   ChangeUserLastNameDto,
   ChangeUserNickNameDto,
-} from 'src/auth/dto/modified-data-user.dto';
+  ChangeUserNameDto
+} from '../dto/modified-data-user.dto';
 import { JwtPayload } from 'jsonwebtoken';
-import { ChangeUserNameDto } from 'src/auth/dto/modified-data-user.dto';
-import { AuthService } from 'src/auth/services/auth.service';
-import { userInfo } from 'src/auth/interfaces/user-info.interface';
 
 @Controller('user') // Prefix route
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly authService: AuthService,
   ) {}
 
   @Post('register') // Route register user

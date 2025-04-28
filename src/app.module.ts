@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
+import { RosetaModule } from './roseta/roseta.module';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ dotenv.config();
     }),
     UserModule,
     AuthModule,
+    RosetaModule
   ],
 })
 export class AppModule {}

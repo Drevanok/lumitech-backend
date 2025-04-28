@@ -1,5 +1,5 @@
 
-export class userLogin {
+export class UserLogin {
     uuid: string;
     email: string;
 }

@@ -28,11 +28,10 @@ async function lumintechApp() {
     }),
   );
 
-  // CORS
   // app.enableCors({
-  //   origin: process.env.FRONT_URL,
+  //   origin: process.env.FRONT_URL, // por ejemplo: https://app.lumintech.com
   // });
-
+  
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 
