@@ -1,59 +1,87 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import * as QRCode from 'qrcode';
-import { GenerateQrDto } from '../dto/generate-qr.dto';
-import * as qrcodeTerminal from 'qrcode-terminal';
-import { RegisterRosetaDto } from '../dto/create-roseta.dto';
+import { CreateRosettaDto } from '../dto/create-rosetta.dto';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
+import { ReceivedDataRosettaDto } from '../dto/received-data.dto';
+import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
+
+let ip_rosetta = '';
+let mac_rosetta = '';
+let ssdi_wifi = '';
+let password_wifi = '';
+let owner_uuid = '';
 
 @Injectable()
 export class RosetaService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly httpService: HttpService
+  ) {}
 
-  async generateQRCode(generateQrDto: GenerateQrDto, uuid: string): Promise<{ qrCode: string }> {
-    const { wifiSSID, wifiPassword, ubication} = generateQrDto;
 
+  async receivedIPRosetta(receivedIpRosettaDto: ReceivedIpRosettaDto): Promise<{ msg: string }> {
+    const {rossette_ip} = receivedIpRosettaDto;
+    console.log('IP recibida en el backend:', rossette_ip);
+
+    ip_rosetta = rossette_ip
+    console.log('IP de la roseta guardada:', ip_rosetta);
+    return { msg: 'IP de la roseta recibida correctamente' };
+  }
+
+  async sendUUID(uuid: string): Promise<{ msg: string }> {
+    
     try {
-      // Generar el string para el código QR con SSID, contraseña, ubicación y UUID
-      const wifiString = `${wifiSSID},${wifiPassword}, ${ubication},${uuid}`;
+      // Aquí haces la solicitud HTTP POST al ESP32
+      const apiUrl = `http://${ip_rosetta}/set-uuid`;  // Reemplaza <ESP32_IP> por la IP de tu ESP32
 
-      console.log(wifiString);
-      // Generar e imprimir el código QR en la consola
-      qrcodeTerminal.generate(wifiString, { small: true });
+      // Enviamos el UUID al ESP32
+      const response = await lastValueFrom(
+        this.httpService.post(apiUrl, { uuid })  // Aquí envías el UUID en el cuerpo de la solicitud
+      );
 
-      // Generar el código QR en formato base64 (si lo necesitas para retornarlo)
-      const qrCodeDataURL = await QRCode.toDataURL(wifiString);
+      // Suponiendo que el ESP32 responde con un mensaje
+      console.log("Respuesta del ESP32:", response.data);
 
-      // Retornar el QR como una cadena base64
-      return { qrCode: qrCodeDataURL };
+      return { msg: 'UUID enviado correctamente' };
+
     } catch (error) {
-      console.error('Error al generar el QR:', error);
-      throw new InternalServerErrorException('Error al generar el código QR.');
+      console.log('Error al enviar el UUID al ESP32:', error);
+      throw new InternalServerErrorException('Error al enviar el UUID al ESP32');
     }
   }
 
-  async registerRoseta(registerRosetaDto: RegisterRosetaDto): Promise<{ message: string }> {
-    const {ubication,  macAddress, wifiSSID, wifiPassword, uuid} = registerRosetaDto;
+  async receivedDataRosetta(receivedDataRosettaDto: ReceivedDataRosettaDto): Promise<{ msg: string }> {
+    const { rosette_mac, wifi_ssid, wifi_password, uuid_owner} = receivedDataRosettaDto
+
+    mac_rosetta = rosette_mac
+    ssdi_wifi = wifi_ssid
+    password_wifi = wifi_password
+    owner_uuid = uuid_owner
+    console.log('Datos recibidos en el backend:', rosette_mac, wifi_ssid, wifi_password, uuid_owner);
+    console.log('Datos guardados:', mac_rosetta, ssdi_wifi, password_wifi, owner_uuid);
+    return { msg: 'Datos recibidos correctamente' };
+  }
+
+  async registerRosetta(
+    createRosettaDto: CreateRosettaDto,
+  ): Promise<{ msg: string }> {
+    const { rosette_mac, wifi_ssid, wifi_password} =
+      createRosettaDto;
 
     try {
-      // Ejecutar el procedimiento almacenado 'register_rosette
-      await this.dataSource.query('CALL register_rosette(?, ?, ?, ?, ?, @p_message)', [
-        ubication,
-        macAddress,
-        wifiSSID,
-        wifiPassword,
-        uuid,
-      ]);
+      await this.dataSource.query(
+        'CALL register_rosette(?, ?, ?, ?, @p_message)',
+        [rosette_mac, wifi_ssid, wifi_password],
+      );
 
-      // Obtener el mensaje de salida del procedimiento almacenado
-      const result = await this.dataSource.query('SELECT @p_message AS message');
+      const result = await this.dataSource.query(
+        'SELECT @p_message as message',
+      );
       console.log(result[0].message);
-      return {message: result[0].message};
-
+      return { msg: result[0].message };
     } catch (error) {
-      console.error('Error al registrar la roseta:', error);
+      console.log('Error al registrar la roseta:', error);
       throw new InternalServerErrorException('Error al registrar la roseta.');
     }
   }

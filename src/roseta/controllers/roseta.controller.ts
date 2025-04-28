@@ -8,33 +8,43 @@ import {
   Req,
 } from '@nestjs/common';
 import { RosetaService } from '../services/roseta.service';
-import { RegisterRosetaDto } from '../dto/create-roseta.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { JwtPayload } from 'jsonwebtoken'
-import { GenerateQrDto } from '../dto/generate-qr.dto';
+//import { JwtPayload } from '../../auth/interfaces/jwt-payload.interface';
+import { JwtPayload } from 'jsonwebtoken';
+import { CreateRosettaDto } from '../dto/create-rosetta.dto';
+import { ReceivedDataRosettaDto } from '../dto/received-data.dto';
+import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 
 @Controller('roseta')
 export class RosetaController {
   constructor(private readonly rosetaService: RosetaService) {}
 
-@Post('pre-register')
-@UseGuards(JwtAuthGuard)
-@HttpCode(HttpStatus.OK)
-async generateQr(
-  @Body() generateQrDto: GenerateQrDto,
-  @Req() req: { user: JwtPayload },
-){
-  const uuid = req.user.uuid;  // Obtienes el UUID del usuario
-  return this.rosetaService.generateQRCode(
-    generateQrDto,
-    uuid,
-  );
-}
+  @Post('received-ip')
+  @HttpCode(HttpStatus.OK)
+  async receivedIP(@Body() receivedIpRosettaDto: ReceivedIpRosettaDto) {
+    console.log('Ip:', receivedIpRosettaDto);
+    return await this.rosetaService.receivedIPRosetta(receivedIpRosettaDto);
+  }
+
+  @Post('send-uuid')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async sendUUID(@Req() req: {user: JwtPayload}) {
+    const userUuid = req.user.uuid;
+    return await this.rosetaService.sendUUID(userUuid);
+  }
+
+  @Post('received-data')
+  @HttpCode(HttpStatus.OK)
+  async receivedData(
+    @Body() receivedDataRosettaDto: ReceivedDataRosettaDto,
+  ): Promise<{ msg: string }> {
+    return await this.rosetaService.receivedDataRosetta(receivedDataRosettaDto);
+  }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async registerRoseta(@Body() registerRosetaDto: RegisterRosetaDto) {
-    return this.rosetaService.registerRoseta(registerRosetaDto);
+  async registerRosetta(@Body() createRosettaDto: CreateRosettaDto) {
+    return await this.rosetaService.registerRosetta(createRosettaDto);
   }
 }
-
