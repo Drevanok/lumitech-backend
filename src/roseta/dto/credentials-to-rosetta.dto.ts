@@ -7,3 +7,4 @@ export class CredentialsToRosettaDto {
   @IsString()
   wifi_password: string;
 }
+

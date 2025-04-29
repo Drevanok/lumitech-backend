@@ -60,7 +60,7 @@ export class RosetaService {
       const result = await this.dataSource.query(
         'SELECT @p_message as message',
       );
-      console.log(result[0].message);
+      console.log(result[0].message); //Roseta registrada correctamente 
       return { msg: result[0].message };
     } catch (error) {
       console.log('Error al registrar la roseta:', error);

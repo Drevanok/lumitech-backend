@@ -34,14 +34,13 @@ export class EmailService {
         subject: 'Verifica tu cuenta en Lumitech',
         html: `<p>Hola, ${name},</p>
                        <p>Gracias por registrarte en Lumitech. Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
-                       <a href="${process.env.FRONTEND_URL}/confirmar/${token}">Verificar cuenta</a>
+                        <p>copia y pega el token en tu aplicacion para verificar tu cuenta</p>
+                       <a>${token}</a>
+                        <p>O copia y pega el siguiente enlace en tu navegador:</p>
                        <p>Si no te registraste en Lumitech, ignora este correo.</p>`,
       });
       //console.log('Mensaje enviado: %s', info.messageId);
       console.log(`Token de verificación: ${token}`);
-      console.log(
-        `URL temporal para verificación: http://localhost:3000/user/confirm/${token}`,
-      );
     } catch (error) {
       console.error('Error enviando el correo: ', error);
 
@@ -60,7 +59,8 @@ export class EmailService {
         subject: 'Recuperación de contraseña en Lumitech',
         html: `<p>Hola, ${name},</p>
                       <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para restablecerla:</p>
-                      <a href="${process.env.FRONTEND_URL}/reset-password?token=${resetToken}">Restablecer contraseña</a>
+                      <p>copia y pega el token en tu aplicacion para reestablecer tu contraseña</p>
+                      <a>${resetToken}</a>
                       <p>Si no solicitaste el restablecimiento de contraseña, ignora este correo.</p>`,
       });
 
