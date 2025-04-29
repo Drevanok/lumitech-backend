@@ -18,6 +18,7 @@ import {
   ChangeUserNameDto
 } from '../dto/modified-data-user.dto';
 import { UserInfo } from '../../auth/interfaces/user-info.interface';
+import { VerifyEmailTokenDto } from '../dto/verify-email-token.dto';
 
 @Injectable()
 export class UserService {
@@ -70,7 +71,8 @@ export class UserService {
   }
 
   //function verification user with email
-  async confirmUserEmail(token: string): Promise<{ msg: string }> {
+  async confirmUserEmail(verifyEmailTokenDto: VerifyEmailTokenDto): Promise<{ msg: string }> {
+    const { token } = verifyEmailTokenDto;
     try {
       //validate token
       if (!token) {
@@ -213,10 +215,9 @@ export class UserService {
   
   //function reset password, save new password
   async resetPassword(
-    token: string,
     resetPasswordDto: ResetPasswordDto,
   ): Promise<{ msg: string }> {
-    const { userNewPassword } = resetPasswordDto;
+    const { token, userNewPassword } = resetPasswordDto;
 
     if (!token || !userNewPassword) {
       throw new HttpException(

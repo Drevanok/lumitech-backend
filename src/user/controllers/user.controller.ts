@@ -23,6 +23,7 @@ import {
   ChangeUserNameDto
 } from '../dto/modified-data-user.dto';
 import { JwtPayload } from 'jsonwebtoken';
+import { VerifyEmailTokenDto } from '../dto/verify-email-token.dto';
 
 @Controller('user') // Prefix route
 export class UserController {
@@ -39,10 +40,10 @@ export class UserController {
     return { message: 'Usuario registrado correctamente' };
   }
 
-  @Get('verify/:token')
+  @Post('verify-email')
   @HttpCode(HttpStatus.OK) //Return code 200 if response is successful
-  async confirmEmail(@Param('token') token: string) {
-    return await this.userService.confirmUserEmail(token);
+  async confirmEmail(@Body() verifyEmailTokenDto: VerifyEmailTokenDto) { 
+    return await this.userService.confirmUserEmail(verifyEmailTokenDto);
   }
 
   @Post('resend-verification')
@@ -58,14 +59,14 @@ export class UserController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getProfile(@Request() req: any){
+  async getProfile(@Request() req: { user: JwtPayload }) {
     const uuid = req.user.uuid;
     const user = await this.userService.getUserProfile(uuid);
-
     return {
       user,
     };
   }
+
 
   //recover password with email
   @Post('forget-password')
@@ -74,12 +75,11 @@ export class UserController {
   }
 
   //save new password with token recover password
-  @Post('reset-password/:token')
+  @Post('reset-password')
   async resetPassword(
-    @Param('token') token: string,
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ): Promise<{ msg: string }> {
-    return this.userService.resetPassword(token, resetPasswordDto);
+    @Body() resetPasswordDto: ResetPasswordDto
+  ){
+    return this.userService.resetPassword(resetPasswordDto);
   }
 
   //user auth service change password
