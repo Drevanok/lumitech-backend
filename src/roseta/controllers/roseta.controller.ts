@@ -8,6 +8,7 @@ import {
   Req,
   Get,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { RosetaService } from '../services/roseta.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -15,6 +16,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 import { FirebaseService } from '../../firebase/services/firebase.service';
 import { ChangeUbicationDto } from '../dto/modified-data-rosette.dto';
+import path from 'path';
 
 @Controller('roseta')
 export class RosetaController {
@@ -87,7 +89,7 @@ export class RosetaController {
   }
 
   //Endpoint to get the ubication of the rosettes
-  @Post('change-ubication')
+  @Patch('change-ubication')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async changeUbication(
