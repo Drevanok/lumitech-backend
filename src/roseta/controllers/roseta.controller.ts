@@ -24,17 +24,19 @@ export class RosetaController {
     return await this.rosetaService.receivedIPRosetta(receivedIpRosettaDto);
   }
 
-  @Post('send-uuid')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  async sendUUID(@Req() req: {user: JwtPayload}) {
-    const userUuid = req.user.uuid;
-    return await this.rosetaService.sendUUID(userUuid);
-  }
+  // @Post('send-uuid')
+  // @UseGuards(JwtAuthGuard)
+  // @HttpCode(HttpStatus.OK)
+  // async sendUUID(@Req() req: {user: JwtPayload}) {
+  //   const userUuid = req.user.uuid;
+  //   return await this.rosetaService.sendUUID(userUuid);
+  // }
   
   @Post('register')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
-  async registerRosetta(@Body() createRosettaDto: CreateRosettaDto) {
-    return await this.rosetaService.registerRosetta(createRosettaDto);
+  async registerRosetta(@Req() req: {user: JwtPayload}) {
+    const userUuid = req.user.uuid;
+    return await this.rosetaService.registerRosetta(userUuid);
   }
 }

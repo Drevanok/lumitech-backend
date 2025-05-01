@@ -1,66 +1,69 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { CreateRosettaDto } from '../dto/create-rosetta.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
+import { plainToInstance } from 'class-transformer';
+import { validateSync } from 'class-validator';
 
-let ip_rosetta = '';
+let ip_rosetta ='';
 
 @Injectable()
 export class RosetaService {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
   ) {}
 
-
-  async receivedIPRosetta(receivedIpRosettaDto: ReceivedIpRosettaDto): Promise<{ msg: string }> {
-    const {rossette_ip} = receivedIpRosettaDto;
+  //method to receive the IP from the rosette dinamically and store it in a variable ip_rosetta
+  async receivedIPRosetta(
+    receivedIpRosettaDto: ReceivedIpRosettaDto,
+  ): Promise<{ msg: string }> {
+    const { rossette_ip } = receivedIpRosettaDto;
     console.log('IP recibida en el backend:', rossette_ip);
 
-    ip_rosetta = rossette_ip
+    ip_rosetta = rossette_ip;
     console.log('IP de la roseta guardada:', ip_rosetta);
     return { msg: 'IP de la roseta recibida correctamente' };
   }
 
-  async sendUUID(uuid: string): Promise<{ msg: string }> {
-    
+  //this method is used to register the rosetta in the database
+  async registerRosetta(uuid: string): Promise<{ msg: string }> {
     try {
-      
-      const apiUrl = `http://${ip_rosetta}/set-uuid`;  //url ESP32 dinamic
+      const apiUrl = `http://${ip_rosetta}/send-data`;
 
-      const response = await lastValueFrom(
-        this.httpService.post(apiUrl, { uuid }) //send uuid to ESP32
-      );
+      const response = await lastValueFrom(this.httpService.get(apiUrl));
+      const dataFromEsp32 = response.data;
 
-      //check response ESP32
-      console.log("Respuesta del ESP32:", response.data);
+      //console.log('Datos recibidos del ESP32:', dataFromEsp32);
 
-      return { msg: 'UUID enviado correctamente' };
+      // validate the data received from ESP32 using class-validator
+      const dtoInstance = plainToInstance(CreateRosettaDto, dataFromEsp32);
+      const errors = validateSync(dtoInstance);
 
-    } catch (error) {
-      console.log('Error al enviar el UUID al ESP32:', error);
-      throw new InternalServerErrorException('Error al enviar el UUID al ESP32');
-    }
-  }
+      if (errors.length > 0) {
+        console.log('Errores de validación:', errors);
+        throw new BadRequestException(
+          'Los datos recibidos del ESP32 no son válidos.',
+        );
+      }
 
-  async registerRosetta(
-    createRosettaDto: CreateRosettaDto,
-  ): Promise<{ msg: string }> {
-    const { rosette_mac, wifi_ssid, wifi_password, uuid_owner} =
-      createRosettaDto;
+      const { rosette_mac, rosette_ip, wifi_ssid, wifi_password } = dtoInstance;
 
-    try {
       await this.dataSource.query(
-        'CALL register_rosette(?, ?, ?, ?, @p_message)',
-        [rosette_mac, wifi_ssid, wifi_password, uuid_owner],
+        'CALL register_rosette(?, ?, ?, ?, ?, @p_message)',
+        [rosette_mac, rosette_ip, wifi_ssid, wifi_password, uuid],
       );
 
       const result = await this.dataSource.query(
         'SELECT @p_message as message',
       );
-      console.log(result[0].message); //Roseta registrada correctamente 
+
       return { msg: result[0].message };
     } catch (error) {
       console.log('Error al registrar la roseta:', error);
