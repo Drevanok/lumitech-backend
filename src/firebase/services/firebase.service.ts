@@ -19,7 +19,7 @@ export class FirebaseService {
     this.db = admin.database();
   }
 
-  // Method to send sensor data to Firebase
+  // service to send sensor data to Firebase
   async sendSensorData(data: SensorData) {
     const mac = data.rosette_mac;
     const temperature = data.temperature;
@@ -57,7 +57,7 @@ export class FirebaseService {
     }
   }
 
-  // Method to send an alert to Firebase
+  // Function to send an alert to Firebase
   private async sendAlert(mac: string, temperature: number) {
     const alertPath = `alerts/${mac}`;
     await this.db.ref(alertPath).set({
@@ -68,7 +68,7 @@ export class FirebaseService {
     console.log(`Alerta enviada para la roseta ${mac}: Temperatura muy alta: ${temperature}°C`);
   }
 
-  // Method to get sensor information from Firebase
+  // service to get sensor information from Firebase
   async getInfoSensor(mac: string): Promise<SensorInfoResponse> {
     try {
       // Rutas
@@ -107,7 +107,7 @@ export class FirebaseService {
     }
   }
 
-  // Method to get alerts from Firebase
+  // service to get alerts from Firebase
   async getAlert(mac: string): Promise<any> {
     const alertRef = this.db.ref(`alerts/${mac}`);
     const alertSnapshot = await alertRef.once('value');
