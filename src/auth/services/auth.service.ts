@@ -14,6 +14,7 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
+  //Service to login the user and validate the credentials, authenticate the user and generate a JWT token
   async login(loginDto: LoginDto): Promise<LoginResponse> {
     const { email, nickName, password } = loginDto;
 
@@ -54,15 +55,18 @@ export class AuthService {
       throw new HttpException('Usuario no verificado.', HttpStatus.FORBIDDEN);
     };
 
+    // If the user is verified and the password is correct, proceed to get the user and generate a JWT token
     const user = await this.getUser(loginField);
     const token = this.generateJwtToken(user);
 
+    //return the token and user data
     return {
       token,
       user: this.buildUserResponse(user),
     };
   }
 
+  //Function to validate the user credentials
   private async validateUser(nickNameOrEmail: string) {
     await this.dataSource.query(
       `CALL validate_session(?, @p_password_hash, @p_user_verified, @p_result);`,
@@ -86,6 +90,7 @@ export class AuthService {
     return resultData;
   }
 
+  //Function to validate the password
   private async validatePassword(password: string, passwordHash: string) {
     try {
       return await compare(password, passwordHash);
@@ -97,6 +102,7 @@ export class AuthService {
     }
   }
   
+  //Function to get the user data
   private async getUser(nickNameOrEmail: string) {
     const [user] = await this.dataSource.query(
       `SELECT uuid, user_name AS userName, user_nickname AS nickName, user_email AS email 
@@ -116,11 +122,14 @@ export class AuthService {
     return user;
   }
 
+  //Function to generate the JWT token
   private generateJwtToken(user: UserLogin) {
     const payload = {uuid: user.uuid};
     return this.jwtService.sign(payload);
   }
 
+
+  //Function to build the user response
   private buildUserResponse(user: UserLogin) {
     return {
       uuid: user.uuid,

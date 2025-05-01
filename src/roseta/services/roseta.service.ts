@@ -10,8 +10,11 @@ import { lastValueFrom } from 'rxjs';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
+import { ChangeUbicationDto } from '../dto/modified-data-rosette.dto';
+import { Rosetta } from '../interface/rosetta.interface';
 
-let ip_rosetta ='';
+//Variable to store the IP of the rosette
+let ipRosette ='';
 
 @Injectable()
 export class RosetaService {
@@ -20,22 +23,22 @@ export class RosetaService {
     private readonly httpService: HttpService,
   ) {}
 
-  //method to receive the IP from the rosette dinamically and store it in a variable ip_rosetta
+  //service to receive the IP from the rosette dinamically and store it in a variable ip_rosetta
   async receivedIPRosetta(
     receivedIpRosettaDto: ReceivedIpRosettaDto,
   ): Promise<{ msg: string }> {
     const { rossette_ip } = receivedIpRosettaDto;
     console.log('IP recibida en el backend:', rossette_ip);
 
-    ip_rosetta = rossette_ip;
-    console.log('IP de la roseta guardada:', ip_rosetta);
+    ipRosette = rossette_ip;
+    console.log('IP de la roseta guardada:', ipRosette);
     return { msg: 'IP de la roseta recibida correctamente' };
   }
 
-  //this method is used to register the rosetta in the database
+  //service is used to register the rosetta in the database
   async registerRosetta(uuid: string): Promise<{ msg: string }> {
     try {
-      const apiUrl = `http://${ip_rosetta}/send-data`;
+      const apiUrl = `http://${ipRosette}/send-data`;
 
       const response = await lastValueFrom(this.httpService.get(apiUrl));
       const dataFromEsp32 = response.data;
@@ -68,6 +71,53 @@ export class RosetaService {
     } catch (error) {
       console.log('Error al registrar la roseta:', error);
       throw new InternalServerErrorException('Error al registrar la roseta.');
+    }
+  }
+
+  //service to get all the rosettes of the user
+  async getAllRosettes(uuid: string): Promise<{ msg: string; data: Rosetta[] }> {
+    try {
+      const result = await this.dataSource.query(
+        'CALL get_rosettes_by_user(?)',
+        [uuid],
+      );
+  
+      return {
+        msg: 'Rosetas obtenidas correctamente',
+        data: result[0],
+      };
+    } catch (error) {
+      console.error('Error al obtener las rosetas del usuario:', error);
+      throw new InternalServerErrorException('Error al obtener las rosetas del usuario.');
+    }
+  }
+
+  //service to change the ubication of the rosette
+  async changeUbication(
+    changeUbicationDto: ChangeUbicationDto,
+    uuid: string,
+  ): Promise<{ msg: string }> {
+    const { ubication, rosette_mac } = changeUbicationDto;
+  
+    try {
+      await this.dataSource.query(
+        'CALL change_rosette_ubication(?, ?, ?, @p_message)',
+        [ubication, uuid, rosette_mac],
+      );
+  
+      const result = await this.dataSource.query('SELECT @p_message as message');
+      const message = result[0]?.message;
+  
+      if (message === 'Ubicación de roseta actualizada exitosamente') {
+        return { msg: message };
+      } else {
+        throw new BadRequestException(message || 'No se pudo actualizar la ubicación.');
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error al cambiar la ubicación de la roseta.');
     }
   }
 }

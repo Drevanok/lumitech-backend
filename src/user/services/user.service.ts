@@ -27,7 +27,7 @@ export class UserService {
     private readonly emailService: EmailService,
   ) {}
 
-  //function register/create new user in app
+  //service register/create new user in app
   async createUser(createUserDto: CreateUserDto): Promise<void> {
     const { userName, userLastName, userNickName, userEmail, userPassword } =
       createUserDto;
@@ -70,7 +70,7 @@ export class UserService {
     );
   }
 
-  //function verification user with email
+  //service verify user email
   async confirmUserEmail(verifyEmailTokenDto: VerifyEmailTokenDto): Promise<{ msg: string }> {
     const { token } = verifyEmailTokenDto;
     try {
@@ -119,6 +119,7 @@ export class UserService {
     }
   }
 
+  //service resend verification email
   async resendVerificationEmail(email:string): Promise<{msg: string}>{
     const newToken = uuidv4();
 
@@ -147,7 +148,7 @@ export class UserService {
   };
 
 
-  //get user profile after authenticate login
+  //service get user profile after authenticate login
   async getUserProfile(uuid: string): Promise<UserInfo> {
     const [searchUser] = await this.dataSource.query(
       `CALL get_user_by_uuid(?)`,
@@ -170,6 +171,7 @@ export class UserService {
     };
   }
 
+  //service user generate token to reset password
   async forgetPassword(email: string): Promise<{ msg: string }> {
     const resetToken = uuidv4();
   
@@ -213,7 +215,7 @@ export class UserService {
     }
   }
   
-  //function reset password, save new password
+  //service reset password with token
   async resetPassword(
     resetPasswordDto: ResetPasswordDto,
   ): Promise<{ msg: string }> {
@@ -241,7 +243,7 @@ export class UserService {
       throw new BadRequestException('Usuario no encontrado o token inválido');
     }
 
-    // Comparar con la nueva contraseña
+    //compare new password with current password
     const isSamePassword = await compare(userNewPassword, currentPassword);
 
     if (isSamePassword) {
@@ -342,7 +344,7 @@ export class UserService {
     }
   }
 
-  //user authenticate user, change user last name
+  //service user authenticate user, change user last name
   async changeUserLastName(
     uuid: string,
     changeUserLastNameDto: ChangeUserLastNameDto,
@@ -368,6 +370,7 @@ export class UserService {
     }
   }
 
+  //service user authenticate user, change user nickname
   async changeUserNickName(
     uuid: string,
     changeUserNickNameDto: ChangeUserNickNameDto,

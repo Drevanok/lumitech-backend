@@ -31,6 +31,7 @@ export class UserController {
     private readonly userService: UserService,
   ) {}
 
+  //Endpoit to register a user
   @Post('register') // Route register user
   @HttpCode(HttpStatus.CREATED) // Return code 201 if response is successful
   async register(
@@ -40,12 +41,14 @@ export class UserController {
     return { message: 'Usuario registrado correctamente' };
   }
 
+  //Endpoint to verify email
   @Post('verify-email')
   @HttpCode(HttpStatus.OK) //Return code 200 if response is successful
   async confirmEmail(@Body() verifyEmailTokenDto: VerifyEmailTokenDto) { 
     return await this.userService.confirmUserEmail(verifyEmailTokenDto);
   }
 
+  //Endpoint to resend verification email
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   async resendVerification(
@@ -54,6 +57,7 @@ export class UserController {
       return this.userService.resendVerificationEmail(email);
     };
 
+  //Endpoint to get user by uuid
   //after auth/login in authService and authController.
   //get profile user authenticate in login
   @Get('profile')
@@ -68,13 +72,13 @@ export class UserController {
   }
 
 
-  //recover password with email
+  //Endpoint recover password with email
   @Post('forget-password')
   async forgetPassword(@Body('email') email: string) {
     return this.userService.forgetPassword(email);
   }
 
-  //save new password with token recover password
+  //Endpoint save new password with token recover password
   @Post('reset-password')
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto
@@ -82,7 +86,7 @@ export class UserController {
     return this.userService.resetPassword(resetPasswordDto);
   }
 
-  //user auth service change password
+  //Endpoint user auth service change password
   @Patch('change-password')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
@@ -94,7 +98,7 @@ export class UserController {
     return this.userService.changePassword(uuid, changePasswordDto);
   }
   
-  //user auth service change name
+  //Endpoint user auth service change name
   @Patch('change-name')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
@@ -106,7 +110,7 @@ export class UserController {
     return this.userService.changeUserName(uuid, changeUserNameDto);
   }
 
-  //user auth service change last name
+  //Endpoint user auth service change last name
   @Patch('change-lastname')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
@@ -118,6 +122,8 @@ export class UserController {
     return this.userService.changeUserLastName(uuid, changeUserLastnameDto);
   }
 
+
+  //Endpoint user auth service change nickname
   @Patch('change-nickname')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

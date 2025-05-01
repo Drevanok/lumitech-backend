@@ -13,6 +13,7 @@ import { LoginResponse } from '../interfaces/login-response';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  //Endpoint to login the user
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
