@@ -71,7 +71,7 @@ export class FirebaseService {
   // service to get sensor information from Firebase
   async getInfoSensor(mac: string): Promise<SensorInfoResponse> {
     try {
-      // Rutas
+      // Routes
       const tempRef = this.db.ref(`rosettes/${mac}/sensors/temperature`);
       const humRef = this.db.ref(`rosettes/${mac}/sensors/humidity`);
 

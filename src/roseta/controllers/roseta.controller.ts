@@ -16,7 +16,6 @@ import { JwtPayload } from 'jsonwebtoken';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 import { FirebaseService } from '../../firebase/services/firebase.service';
 import { ChangeUbicationDto } from '../dto/modified-data-rosette.dto';
-import path from 'path';
 
 @Controller('roseta')
 export class RosetaController {
@@ -53,7 +52,7 @@ export class RosetaController {
 
   // Endpoint to receive data from ESP32 and send it to Firebase
   @Post('sensor-data')
-  async recibirDatosDesdeESP32(@Body() data: any) {
+  async receivedDataRosette(@Body() data: any) {
     console.log('Datos recibidos del ESP32:', data);
 
     try {
