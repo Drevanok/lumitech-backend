@@ -120,4 +120,25 @@ export class RosetaService {
       throw new InternalServerErrorException('Error al cambiar la ubicación de la roseta.');
     }
   }
+
+  //service remove device for user
+  async removeRosette(mac: string, uuid: string): Promise<{msg: string}> {
+   
+    try {
+      await this.dataSource.query(
+        'CALL delete_rosette_for_user(?, ?, @p_message)',
+      [uuid, mac]);
+
+      const result = await this.dataSource.query(
+        'SELECT @p_message as message',
+      );
+
+      return { msg: result[0].message };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error interno al intentar eliminar esta roseta.');
+    }
+  }
 }

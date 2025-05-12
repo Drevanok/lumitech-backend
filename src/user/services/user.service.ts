@@ -344,7 +344,7 @@ export class UserService {
     }
   }
 
-  //service user authenticate user, change user last name
+  //service user authenticate, change user last name
   async changeUserLastName(
     uuid: string,
     changeUserLastNameDto: ChangeUserLastNameDto,
@@ -370,7 +370,7 @@ export class UserService {
     }
   }
 
-  //service user authenticate user, change user nickname
+  //service user authenticate, change user nickname
   async changeUserNickName(
     uuid: string,
     changeUserNickNameDto: ChangeUserNickNameDto,
@@ -394,5 +394,10 @@ export class UserService {
         HttpStatus.NOT_MODIFIED,
       );
     }
+  }
+
+  //service user authenticate, logout
+  async logout(uuid: string): Promise<void>{
+    await this.dataSource.query('CALL increment_token_version(?)', [uuid])
   }
 }

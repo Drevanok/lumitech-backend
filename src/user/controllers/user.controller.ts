@@ -134,4 +134,13 @@ export class UserController {
     const uuid = req.user.uuid;
     return this.userService.changeUserNickName(uuid, changeUserNickNameDto);
   }
+
+  //Endpoint use auth service logout
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: {user: JwtPayload}): Promise<{message: string}>{
+    const uuid = req.user.uuid;
+    await this.userService.logout(uuid);
+    return {message: 'Sesión cerrada exitosamente.'}
+  }
 }

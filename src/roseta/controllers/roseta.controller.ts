@@ -9,6 +9,7 @@ import {
   Get,
   Param,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { RosetaService } from '../services/roseta.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -16,6 +17,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 import { FirebaseService } from '../../firebase/services/firebase.service';
 import { ChangeUbicationDto } from '../dto/modified-data-rosette.dto';
+
 
 @Controller('roseta')
 export class RosetaController {
@@ -100,5 +102,18 @@ export class RosetaController {
       changeUbicationDto,
       userUuid,
     );
+  }
+
+  //Endpoint to remove device
+  @Delete('remove-rosette/:mac')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async deleteRosette(
+    @Param('mac') mac: string,
+    @Req() req: {user: JwtPayload}
+  ) {
+   const userUuid = req.user.uuid;
+
+   return await this.rosetaService.removeRosette(mac, userUuid)
   }
 }

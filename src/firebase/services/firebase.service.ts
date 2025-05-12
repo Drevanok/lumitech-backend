@@ -108,7 +108,7 @@ export class FirebaseService {
   }
 
   // service to get alerts from Firebase
-  async getAlert(mac: string): Promise<any> {
+  async getAlert(mac: string): Promise<{msg: string, data:string | null}> {
     const alertRef = this.db.ref(`alerts/${mac}`);
     const alertSnapshot = await alertRef.once('value');
 
