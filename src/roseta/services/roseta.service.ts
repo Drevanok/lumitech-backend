@@ -14,7 +14,7 @@ import { ChangeUbicationDto } from '../dto/modified-data-rosette.dto';
 import { Rosetta } from '../interface/rosetta.interface';
 
 //Variable to store the IP of the rosette
-let ipRosette ='';
+let ipRosette = '';
 
 @Injectable()
 export class RosetaService {

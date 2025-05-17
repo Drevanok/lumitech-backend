@@ -7,13 +7,16 @@ import { EmailService } from './services/email.service';
 import { AuthController } from './controllers/auth.controller';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '30d' },
+      secret: process.env.JWT_SECRET, // Secret for access token
+      signOptions: { expiresIn: '15m' }, // Expiration for access token
+    }),
+    JwtModule.register({
+      secret: process.env.JWT_REFRESH_SECRET, // Secret for refresh token
+      signOptions: { expiresIn: '7d' }, // Expiration for refresh token
     }),
     forwardRef(() => UserModule),
   ],

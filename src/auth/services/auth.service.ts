@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 import { compare, hash } from 'bcryptjs';
@@ -56,11 +56,13 @@ export class AuthService {
 
     // If the user is verified and the password is correct, proceed to get the user and generate a JWT token
     const user = await this.getUser(loginField);
-    const token = this.generateJwtToken(user);
+    const accessToken = this.generateJwtToken(user);
+    const refreshToken = this.generateRefreshToken(user);
 
     // Return the token and user data
     return {
-      token,
+      access_token: accessToken,
+      refresh_token: refreshToken,
       user: this.buildUserResponse(user),
     };
   }
@@ -71,7 +73,7 @@ export class AuthService {
       `CALL validate_session(?, @p_password_hash, @p_user_verified, @p_result);`,
       [nickNameOrEmail],
     );
-
+    
     const [resultData] = await this.dataSource.query(
       `SELECT 
         @p_password_hash AS passwordHash, 
@@ -104,10 +106,7 @@ export class AuthService {
   // Function to get the user data
   private async getUser(nickNameOrEmail: string) {
     const [user] = await this.dataSource.query(
-      `SELECT uuid, user_name AS userName, user_nickname AS nickName, user_email AS email, token_version 
-       FROM user 
-       WHERE user_nickname = ? OR user_email = ?
-       LIMIT 1;`,
+      `CALL GetUserByNicknameOrEmail(?, ?)`,
       [nickNameOrEmail, nickNameOrEmail],
     );
 
@@ -121,10 +120,48 @@ export class AuthService {
     return user;
   }
 
-  // Function to generate the JWT token
+  private async getUserByUuid(uuid: string) {
+  const [user] = await this.dataSource.query(
+    `CALL get_user_by_uuid(?)`,
+    [uuid],
+  );
+
+  if (!user) {
+    throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+  }
+
+  return user;
+}
+
+
+  // Function to generate access token
   private generateJwtToken(user: UserLogin) {
     const payload = { uuid: user.uuid, tokenVersion: user.token_version };
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, {secret: process.env.JWT_SECRET, expiresIn: '15m'});
+  }
+
+  //Generate refresh token
+  private generateRefreshToken(user: UserLogin){
+    const payload = {uuid: user.uuid, tokenVersion: user.token_version};
+    return this.jwtService.sign(payload, {secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d'})
+  }
+
+  // Refresh token functionality
+  async refreshToken(refreshToken: string): Promise<LoginResponse> {
+    try {
+      const decoded = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET });
+      const user = await this.getUserByUuid(decoded.uuid); // Get user details
+      const accessToken = this.generateJwtToken(user);
+      const newRefreshToken = this.generateRefreshToken(user);
+
+      return {
+        access_token: accessToken,
+        refresh_token: newRefreshToken,
+        user: this.buildUserResponse(user),
+      };
+    } catch (error) {
+      throw new HttpException('Token inválido o expirado', HttpStatus.UNAUTHORIZED);
+    }
   }
 
   // Function to build the user response
@@ -136,3 +173,7 @@ export class AuthService {
     };
   }
 }
+
+
+
+

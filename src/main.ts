@@ -1,37 +1,42 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import { ValidationPipe } from '@nestjs/common'; // Importa ValidationPipe
+import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import { ExpressAdapter } from '@nestjs/platform-express';
 
 dotenv.config();
 
 async function lumintechApp() {
-  const app = await NestFactory.create<NestFastifyApplication>(
+  const server = express();
+  const app = await NestFactory.create(
     AppModule,
-    new FastifyAdapter(),
+    new ExpressAdapter(server),
   );
 
-  // Enable the global ValidationPipe for the entire app
+  app.use(cookieParser());
+
+  // Pipes globales de validación
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Removes properties not defined in the DTO
-      forbidNonWhitelisted: true, // Throws an error if there are non-permitted properties
-      transform: true, // Transforms the payload to the correct types
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
       validationError: {
-        target: false, // Does not show the original object in the errors
-        value: false, // Does not show the invalid value in the errors
+        target: false,
+        value: false,
       },
     }),
   );
 
-  // app.enableCors({
-  //   origin: process.env.FRONT_URL, // por ejemplo: https://app.lumintech.com
-  // });
-  
+
+  //Enable CORS with credentials to allow secure cross-origin cookies (web)
+  app.enableCors({
+    origin: process.env.FRONT_URL, // example: 'https://app.lumintech.com'
+    credentials: true, // para permitir envío de cookies
+  });
+
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 

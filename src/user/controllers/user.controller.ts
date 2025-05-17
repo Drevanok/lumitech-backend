@@ -4,11 +4,9 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Param,
   UseGuards,
   Req,
   Get,
-  Request,
   Patch,
 } from '@nestjs/common';
 
@@ -63,7 +61,7 @@ export class UserController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getProfile(@Request() req: { user: JwtPayload }) {
+  async getProfile(@Req() req: { user: JwtPayload }) {
     const uuid = req.user.uuid;
     const user = await this.userService.getUserProfile(uuid);
     return {

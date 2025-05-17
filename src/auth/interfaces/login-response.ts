@@ -1,5 +1,6 @@
 export interface LoginResponse {
-  token: string;
+  access_token: string;
+  refresh_token?: string;
   user: {
     uuid: string;
     email: string;
