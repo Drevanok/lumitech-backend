@@ -1,7 +1,7 @@
-import { Injectable, HttpException, HttpStatus} from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
-import { compare, hash } from 'bcryptjs';
+import { compare } from 'bcryptjs';
 import { LoginDto } from '../dto/login.dto';
 import { LoginResponse } from '../interfaces/login-response';
 import { UserLogin } from '../interfaces/user-login.interface';
@@ -13,10 +13,8 @@ export class AuthService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // Service to login the user and validate the credentials, authenticate the user and generate a JWT token
   async login(loginDto: LoginDto): Promise<LoginResponse> {
     const { email, nickName, password } = loginDto;
-
     const loginField = email || nickName;
 
     if (!loginField) {
@@ -31,9 +29,8 @@ export class AuthService {
     }
 
     const resultData = await this.validateUser(loginField);
-    console.log(resultData)
     const { passwordHash, isVerified, result: procedureResult } = resultData;
-    
+
     if (procedureResult === 'USER_NOT_FOUND') {
       throw new HttpException(
         'El nickName o correo no existen.',
@@ -42,24 +39,18 @@ export class AuthService {
     }
 
     const validatePass = await this.validatePassword(password, passwordHash);
-    await this.validatePassword(password, passwordHash);
     if (!validatePass) {
-      throw new HttpException(
-        'Contraseña incorrecta.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    };
+      throw new HttpException('Contraseña incorrecta.', HttpStatus.UNAUTHORIZED);
+    }
 
     if (Number(isVerified) === 0) {
       throw new HttpException('Usuario no verificado.', HttpStatus.FORBIDDEN);
-    };
+    }
 
-    // If the user is verified and the password is correct, proceed to get the user and generate a JWT token
     const user = await this.getUser(loginField);
     const accessToken = this.generateJwtToken(user);
     const refreshToken = this.generateRefreshToken(user);
 
-    // Return the token and user data
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -67,13 +58,12 @@ export class AuthService {
     };
   }
 
-  // Function to validate the user credentials
   private async validateUser(nickNameOrEmail: string) {
     await this.dataSource.query(
       `CALL validate_session(?, @p_password_hash, @p_user_verified, @p_result);`,
       [nickNameOrEmail],
     );
-    
+
     const [resultData] = await this.dataSource.query(
       `SELECT 
         @p_password_hash AS passwordHash, 
@@ -91,7 +81,6 @@ export class AuthService {
     return resultData;
   }
 
-  // Function to validate the password
   private async validatePassword(password: string, passwordHash: string) {
     try {
       return await compare(password, passwordHash);
@@ -103,13 +92,13 @@ export class AuthService {
     }
   }
 
-  // Function to get the user data
   private async getUser(nickNameOrEmail: string) {
-    const [user] = await this.dataSource.query(
+    const [rows] = await this.dataSource.query(
       `CALL GetUserByNicknameOrEmail(?, ?)`,
       [nickNameOrEmail, nickNameOrEmail],
     );
 
+    const user = rows[0];
     if (!user) {
       throw new HttpException(
         'Hubo un error al procesar el inicio de sesión.',
@@ -121,36 +110,54 @@ export class AuthService {
   }
 
   private async getUserByUuid(uuid: string) {
-  const [user] = await this.dataSource.query(
-    `CALL get_user_by_uuid(?)`,
-    [uuid],
-  );
+    const [rows] = await this.dataSource.query(
+      `CALL get_user_by_uuid(?)`,
+      [uuid],
+    );
 
-  if (!user) {
-    throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    const user = rows[0];
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
   }
 
-  return user;
-}
-
-
-  // Function to generate access token
   private generateJwtToken(user: UserLogin) {
-    const payload = { uuid: user.uuid, tokenVersion: user.token_version };
-    return this.jwtService.sign(payload, {secret: process.env.JWT_SECRET, expiresIn: '15m'});
+    const payload = {
+      uuid: user.uuid,
+      tokenVersion: user.token_version,
+    };
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '15m',
+    });
   }
 
-  //Generate refresh token
-  private generateRefreshToken(user: UserLogin){
-    const payload = {uuid: user.uuid, tokenVersion: user.token_version};
-    return this.jwtService.sign(payload, {secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d'})
+  private generateRefreshToken(user: UserLogin) {
+    const payload = {
+      uuid: user.uuid,
+      tokenVersion: user.token_version,
+    };
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    });
   }
 
-  // Refresh token functionality
   async refreshToken(refreshToken: string): Promise<LoginResponse> {
     try {
-      const decoded = this.jwtService.verify(refreshToken, { secret: process.env.JWT_REFRESH_SECRET });
-      const user = await this.getUserByUuid(decoded.uuid); // Get user details
+      const decoded = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+
+      const user = await this.getUserByUuid(decoded.uuid);
+
+      // Validar que el tokenVersion coincida
+      if (decoded.tokenVersion !== user.token_version) {
+        throw new HttpException('Token desactualizado', HttpStatus.UNAUTHORIZED);
+      }
+
       const accessToken = this.generateJwtToken(user);
       const newRefreshToken = this.generateRefreshToken(user);
 
@@ -164,7 +171,6 @@ export class AuthService {
     }
   }
 
-  // Function to build the user response
   private buildUserResponse(user: UserLogin) {
     return {
       uuid: user.uuid,
@@ -173,7 +179,3 @@ export class AuthService {
     };
   }
 }
-
-
-
-

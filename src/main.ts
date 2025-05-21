@@ -36,8 +36,13 @@ async function lumintechApp() {
     origin: process.env.FRONT_URL, // example: 'https://app.lumintech.com'
     credentials: true, // para permitir envío de cookies
   });
+    
+  const PORT = process.env.PORT ?? 3001;
+  const HOST = '192.168.0.209';
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(PORT, HOST);
+
+  console.log(`Servidor NestJS iniciado en http://${HOST}:${PORT}`);
 }
 
 lumintechApp();
