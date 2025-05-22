@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ async function lumintechApp() {
       },
     }),
   );
+
 
   //Enable CORS with credentials to allow secure cross-origin cookies (web)
   app.enableCors({

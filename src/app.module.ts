@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+// src/app.module.ts
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
 import { RosetaModule } from './roseta/roseta.module';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 
 dotenv.config();
 
@@ -24,4 +26,10 @@ dotenv.config();
     RosetaModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RateLimitMiddleware)
+      .forRoutes('*'); // solo afecta a login POST
+  }
+}
