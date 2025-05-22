@@ -39,7 +39,7 @@ async function lumintechApp() {
   });
     
   const PORT = process.env.PORT ?? 3001;
-  const HOST = '192.168.0.25';
+  const HOST = '192.168.0.242';
 
   await app.listen(PORT, HOST);
 

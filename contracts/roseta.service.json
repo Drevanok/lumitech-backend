@@ -1,0 +1,139 @@
+{
+  "endpoints": [
+    {
+      "name": "Receive Rosetta IP",
+      "method": "POST",
+      "url": "/roseta/received-ip",
+      "description": "Recibe la IP dinámica de la roseta y la almacena.",
+      "request": {
+        "rossette_ip": "192.168.0.10"
+      },
+      "requestDto": "ReceivedIpRosettaDto",
+      "response": {
+        "msg": "IP de la roseta recibida correctamente"
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "La dirección IP debe ser IPv4 y no es válida."
+        },
+        {
+          "status": 400,
+          "message": "rossette_ip es requerido"
+        }
+      ]
+    },
+    {
+      "name": "Register Rosetta",
+      "method": "POST",
+      "url": "/roseta/register/:uuid",
+      "description": "Obtiene datos desde la roseta y registra la roseta en base de datos.",
+      "params": {
+        "uuid": "string (UUID del usuario)"
+      },
+      "esp32ResponseDto": {
+        "rosette_mac": "AA:BB:CC:DD:EE:FF",
+        "rosette_ip": "192.168.0.50",
+        "wifi_ssid": "MiRedWifi",
+        "wifi_password": "ContraseñaSegura123"
+      },
+      "requestDto": "CreateRosettaDto (desde ESP32, no body directo)",
+      "response": {
+        "msg": "Roseta registrada correctamente"
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Los datos recibidos del ESP32 no son válidos."
+        },
+        {
+          "status": 500,
+          "message": "Error al registrar la roseta."
+        }
+      ]
+    },
+    {
+      "name": "Get All Rosettes",
+      "method": "GET",
+      "url": "/roseta/all/:uuid",
+      "description": "Obtiene todas las rosetas registradas para un usuario.",
+      "params": {
+        "uuid": "string (UUID del usuario)"
+      },
+      "response": {
+        "msg": "Rosetas obtenidas correctamente",
+        "data": [
+          {
+            "rosette_id": 1,
+            "rosette_ubication": "Oficina Principal",
+            "rosette_register_date": "2023-01-01T12:00:00Z",
+            "wifi_ssid": "MiRedWifi",
+            "rosette_mac": "AA:BB:CC:DD:EE:FF",
+            "rosette_ip": "192.168.0.50",
+            "owner_uuid": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        ]
+      },
+      "errors": [
+        {
+          "status": 500,
+          "message": "Error al obtener las rosetas del usuario."
+        }
+      ]
+    },
+    {
+      "name": "Change Rosetta Ubication",
+      "method": "PUT",
+      "url": "/roseta/ubication/:uuid",
+      "description": "Cambia la ubicación de una roseta específica.",
+      "params": {
+        "uuid": "string (UUID del usuario)"
+      },
+      "request": {
+        "rosette_mac": "AA:BB:CC:DD:EE:FF",
+        "ubication": "Nuevo lugar de ubicación"
+      },
+      "requestDto": "ChangeUbicationDto",
+      "response": {
+        "msg": "Ubicación de roseta actualizada exitosamente"
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "La dirección MAC no es válida."
+        },
+        {
+          "status": 400,
+          "message": "La ubicación no puede estar vacía."
+        },
+        {
+          "status": 400,
+          "message": "No se pudo actualizar la ubicación."
+        },
+        {
+          "status": 500,
+          "message": "Error al cambiar la ubicación de la roseta."
+        }
+      ]
+    },
+    {
+      "name": "Remove Rosetta",
+      "method": "DELETE",
+      "url": "/roseta/:uuid/:mac",
+      "description": "Elimina una roseta asociada a un usuario.",
+      "params": {
+        "uuid": "string (UUID del usuario)",
+        "mac": "string (MAC address de la roseta)"
+      },
+      "response": {
+        "msg": "Roseta eliminada correctamente"
+      },
+      "errors": [
+        {
+          "status": 500,
+          "message": "Error interno al intentar eliminar esta roseta."
+        }
+      ]
+    }
+  ]
+}

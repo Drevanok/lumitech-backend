@@ -1,0 +1,484 @@
+{
+    "endpoints": [
+        {
+            "name": "Login",
+            "method": "POST",
+            "url": "/auth/login",
+            "description": "Inicia sesión con email o nickName y contraseña.",
+            "request": {
+                "email": "usuario@correo.com",
+                "nickName": "Usuario123",
+                "password": "miContraseña123"
+            },
+            "response": {
+                "access_token": "jwt_access_token",
+                "refresh_token": "jwt_refresh_token",
+                "user": {
+                    "uuid": "1a2b3c4d-1234-5678-9101-abcdef123456",
+                    "email": "usuario@correo.com",
+                    "token_version": 1
+                }
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Email o nickName son requeridos"
+                },
+                {
+                    "status": 400,
+                    "message": "Password es requerido"
+                },
+                {
+                    "status": 404,
+                    "message": "El nickName o correo no existen."
+                },
+                {
+                    "status": 401,
+                    "message": "Contraseña incorrecta."
+                },
+                {
+                    "status": 403,
+                    "message": "Usuario no verificado."
+                },
+                {
+                    "status": 409,
+                    "message": "El usuario ya tiene una sesión activa."
+                }
+            ]
+        },
+        {
+            "name": "Refresh Token",
+            "method": "POST",
+            "url": "/auth/refresh",
+            "description": "Renueva el token de acceso y refresh si el token de sesión es válido.",
+            "request": {
+                "refresh_token": "jwt_refresh_token"
+            },
+            "response": {
+                "access_token": "nuevo_jwt_access_token",
+                "refresh_token": "nuevo_jwt_refresh_token",
+                "user": {
+                    "uuid": "1a2b3c4d-1234-5678-9101-abcdef123456",
+                    "email": "usuario@correo.com",
+                    "token_version": 1
+                }
+            },
+            "errors": [
+                {
+                    "status": 401,
+                    "message": "Sesión inválida o expirada."
+                },
+                {
+                    "status": 401,
+                    "message": "Token desactualizado"
+                },
+                {
+                    "status": 401,
+                    "message": "Token inválido o expirado"
+                },
+                {
+                    "status": 404,
+                    "message": "Usuario no encontrado"
+                }
+            ]
+        },
+        {
+            "name": "Crear Usuario",
+            "method": "POST",
+            "url": "/users/register",
+            "description": "Crea un nuevo usuario y envía un correo de verificación.",
+            "request": {
+                "name": "Saúl",
+                "lastName": "Aparicio",
+                "nickName": "saulDev",
+                "email": "saul@correo.com",
+                "password": "miContraseña123"
+            },
+            "response": {
+                "message": "Usuario creado correctamente. Se envió un correo de verificación."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Datos incompletos o inválidos."
+                },
+                {
+                    "status": 409,
+                    "message": "El usuario ya existe."
+                }
+            ]
+        },
+        {
+            "name": "Verificar Correo",
+            "method": "POST",
+            "url": "/users/verify-email",
+            "description": "Verifica el token enviado por correo y activa la cuenta.",
+            "request": {
+                "token": "tokenDeVerificacion123"
+            },
+            "response": {
+                "message": "Correo verificado correctamente."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Token inválido o expirado."
+                }
+            ]
+        },
+        {
+            "name": "Restablecer Contraseña",
+            "method": "POST",
+            "url": "/users/reset-password",
+            "description": "Permite al usuario establecer una nueva contraseña con un token de recuperación.",
+            "request": {
+                "token": "tokenDeRecuperacion123",
+                "newPassword": "nuevaContraseña456"
+            },
+            "response": {
+                "message": "Contraseña restablecida correctamente."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Token inválido o expirado."
+                },
+                {
+                    "status": 404,
+                    "message": "Usuario no encontrado."
+                }
+            ]
+        },
+        {
+            "name": "Cambiar Contraseña",
+            "method": "PATCH",
+            "url": "/users/change-password",
+            "description": "Permite a un usuario autenticado cambiar su contraseña.",
+            "request": {
+                "oldPassword": "contraseñaAntigua123",
+                "newPassword": "contraseñaNueva456"
+            },
+            "response": {
+                "message": "Contraseña actualizada correctamente."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Contraseña actual incorrecta."
+                }
+            ]
+        },
+        {
+            "name": "Cambiar Nombre",
+            "method": "PATCH",
+            "url": "/users/change-name",
+            "description": "Cambia el nombre del usuario.",
+            "request": {
+                "name": "Saúl"
+            },
+            "response": {
+                "message": "Nombre actualizado correctamente."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Nombre inválido."
+                }
+            ]
+        },
+        {
+            "name": "Cambiar Apellido",
+            "method": "PATCH",
+            "url": "/users/change-lastname",
+            "description": "Cambia el apellido del usuario.",
+            "request": {
+                "lastName": "Aparicio"
+            },
+            "response": {
+                "message": "Apellido actualizado correctamente."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Apellido inválido."
+                }
+            ]
+        },
+        {
+            "name": "Cambiar Nickname",
+            "method": "PATCH",
+            "url": "/users/change-nickname",
+            "description": "Cambia el apodo del usuario.",
+            "request": {
+                "nickName": "nuevoNick"
+            },
+            "response": {
+                "message": "Nickname actualizado correctamente."
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "El nickName ya está en uso."
+                }
+            ]
+        },
+        {
+            "name": "Logout User",
+            "method": "POST",
+            "url": "/logout",
+            "description": "Cierra la sesión del usuario actual y elimina sus sesiones activas.",
+            "authRequired": true,
+            "request": null,
+            "params": null,
+            "response": {
+                "message": "Sesión cerrada correctamente."
+            },
+            "errors": [
+                {
+                    "status": 401,
+                    "message": "No autorizado. Token JWT inválido o no proporcionado."
+                },
+                {
+                    "status": 500,
+                    "message": "Error interno al cerrar la sesión."
+                }
+            ]
+        },
+        {
+            "name": "Receive Rosetta IP",
+            "method": "POST",
+            "url": "/roseta/received-ip",
+            "description": "Recibe la IP dinámica de la roseta y la almacena.",
+            "request": {
+                "rossette_ip": "192.168.0.10"
+            },
+            "requestDto": "ReceivedIpRosettaDto",
+            "response": {
+                "msg": "IP de la roseta recibida correctamente"
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "La dirección IP debe ser IPv4 y no es válida."
+                },
+                {
+                    "status": 400,
+                    "message": "rossette_ip es requerido"
+                }
+            ]
+        },
+        {
+            "name": "Register Rosetta",
+            "method": "POST",
+            "url": "/roseta/register/:uuid",
+            "description": "Obtiene datos desde la roseta y registra la roseta en base de datos.",
+            "params": {
+                "uuid": "string (UUID del usuario)"
+            },
+            "esp32ResponseDto": {
+                "rosette_mac": "AA:BB:CC:DD:EE:FF",
+                "rosette_ip": "192.168.0.50",
+                "wifi_ssid": "MiRedWifi",
+                "wifi_password": "ContraseñaSegura123"
+            },
+            "requestDto": "CreateRosettaDto (desde ESP32, no body directo)",
+            "response": {
+                "msg": "Roseta registrada correctamente"
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "Los datos recibidos del ESP32 no son válidos."
+                },
+                {
+                    "status": 500,
+                    "message": "Error al registrar la roseta."
+                }
+            ]
+        },
+        {
+            "name": "Get All Rosettes",
+            "method": "GET",
+            "url": "/roseta/all/:uuid",
+            "description": "Obtiene todas las rosetas registradas para un usuario.",
+            "params": {
+                "uuid": "string (UUID del usuario)"
+            },
+            "response": {
+                "msg": "Rosetas obtenidas correctamente",
+                "data": [
+                    {
+                        "rosette_id": 1,
+                        "rosette_ubication": "Oficina Principal",
+                        "rosette_register_date": "2023-01-01T12:00:00Z",
+                        "wifi_ssid": "MiRedWifi",
+                        "rosette_mac": "AA:BB:CC:DD:EE:FF",
+                        "rosette_ip": "192.168.0.50",
+                        "owner_uuid": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                ]
+            },
+            "errors": [
+                {
+                    "status": 500,
+                    "message": "Error al obtener las rosetas del usuario."
+                }
+            ]
+        },
+        {
+            "name": "Change Rosetta Ubication",
+            "method": "PUT",
+            "url": "/roseta/ubication/:uuid",
+            "description": "Cambia la ubicación de una roseta específica.",
+            "params": {
+                "uuid": "string (UUID del usuario)"
+            },
+            "request": {
+                "rosette_mac": "AA:BB:CC:DD:EE:FF",
+                "ubication": "Nuevo lugar de ubicación"
+            },
+            "requestDto": "ChangeUbicationDto",
+            "response": {
+                "msg": "Ubicación de roseta actualizada exitosamente"
+            },
+            "errors": [
+                {
+                    "status": 400,
+                    "message": "La dirección MAC no es válida."
+                },
+                {
+                    "status": 400,
+                    "message": "La ubicación no puede estar vacía."
+                },
+                {
+                    "status": 400,
+                    "message": "No se pudo actualizar la ubicación."
+                },
+                {
+                    "status": 500,
+                    "message": "Error al cambiar la ubicación de la roseta."
+                }
+            ]
+        },
+        {
+            "name": "Remove Rosetta",
+            "method": "DELETE",
+            "url": "/roseta/:uuid/:mac",
+            "description": "Elimina una roseta asociada a un usuario.",
+            "params": {
+                "uuid": "string (UUID del usuario)",
+                "mac": "string (MAC address de la roseta)"
+            },
+            "response": {
+                "msg": "Roseta eliminada correctamente"
+            },
+            "errors": [
+                {
+                    "status": 500,
+                    "message": "Error interno al intentar eliminar esta roseta."
+                }
+            ]
+        },
+        {
+            "name": "Send Sensor Data",
+            "method": "POST",
+            "url": "/firebase/sensor-data",
+            "description": "Envía los datos del sensor (temperatura y humedad) a Firebase.",
+            "request": {
+                "rosette_mac": "AA:BB:CC:DD:EE:FF",
+                "temperature": 25.3,
+                "humidity": 55.8
+            },
+            "requestDto": "SensorData",
+            "response": {
+                "msg": "Datos enviados correctamente a Firebase."
+            },
+            "errors": [
+                {
+                    "status": 500,
+                    "message": "Error al enviar datos a Firebase."
+                }
+            ],
+            "notes": [
+                "Si la temperatura supera 70°C, se envía una alerta automáticamente."
+            ]
+        },
+        {
+            "name": "Get Sensor Info",
+            "method": "GET",
+            "url": "/firebase/sensor-info/:mac",
+            "description": "Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.",
+            "params": {
+                "mac": "string (MAC address de la roseta)"
+            },
+            "responseDto": "SensorInfoResponse",
+            "response": {
+                "msg": "Datos obtenidos correctamente",
+                "data": {
+                    "temperature": {
+                        "timestamp": 1684500000000,
+                        "valor": 25.3
+                    },
+                    "humidity": {
+                        "timestamp": 1684500000000,
+                        "valor": 55.8
+                    }
+                }
+            },
+            "errors": [
+                {
+                    "status": 404,
+                    "message": "No se encontraron datos de sensor para la roseta."
+                },
+                {
+                    "status": 500,
+                    "message": "Error al recuperar los datos del sensor."
+                }
+            ]
+        },
+        {
+            "name": "Get Alert",
+            "method": "GET",
+            "url": "/firebase/alert/:mac",
+            "description": "Obtiene la alerta actual para la roseta especificada, si existe.",
+            "params": {
+                "mac": "string (MAC address de la roseta)"
+            },
+            "response": {
+                "msg": "Alerta encontrada",
+                "data": {
+                    "message": "¡Alerta! Temperatura muy alta: 72°C",
+                    "timestamp": 1684500000000
+                }
+            },
+            "responseNoData": {
+                "msg": "No hay alertas para esta roseta.",
+                "data": null
+            },
+            "errors": [
+                {
+                    "status": 500,
+                    "message": "Error al obtener la alerta de Firebase."
+                }
+            ]
+        }
+    ],
+    "dto": {
+        "SensorData": {
+            "rosette_mac": "string (MAC address de la roseta)",
+            "temperature": "number (temperatura en grados Celsius)",
+            "humidity": "number (humedad en porcentaje)"
+        },
+        "SensorValue": {
+            "timestamp": "number (milisegundos desde epoch)",
+            "valor": "number (valor de la medición)"
+        },
+        "SensorInfoResponse": {
+            "msg": "string",
+            "data": {
+                "temperature": "SensorValue",
+                "humidity": "SensorValue"
+            }
+        }
+    }
+}
