@@ -43,18 +43,99 @@ $ pnpm run start:dev
 # production mode
 $ pnpm run start:prod
 ```
+## environment variables - .env
 
-## Run tests
-
+For the project to work correctly, you must create an .env file in the root of the project with the following environment variables:
 ```bash
-# unit tests
-$ pnpm run test
+# Database base configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=your_database_name
 
-# e2e tests
-$ pnpm run test:e2e
+# Server running port
+PORT=3000
 
-# test coverage
-$ pnpm run test:cov
+# Configuration for sending emails with Nodemailer
+EMAIL_HOST=sandbox.smtp.mailtrap.io
+EMAIL_PORT=2525
+EMAIL_USER=your_mailtrap_user
+EMAIL_PASS=your_mailtrap_password
+
+### Frontend URL (for CORS or redirects)
+FRONT_URL=http://localhost:5173
+
+# Secret keys for JWT
+JWT_SECRET=your_jwt_secret_key
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_key
+```
+
+## Firebase Admin SDK Setup
+
+The project uses Firebase Admin for certain functionalities. To do this, you need to download the JSON credentials file from Firebase and place it in:
+```bash
+src/firebase/lumitech-sensors-firebase-adminsdk-fbsvc-50eb2dd997.json
+```
+## Endpoints
+### Base URL
+```bash
+http://192.168.0.242:3001/
+```
+
+
+### Auth Endpoints
+```bash
+http://192.168.0.242:3001/user/auth/login
+http://192.168.0.242:3001/user/auth/refresh
+```
+
+### Registration and authentication
+```bash
+http://192.168.0.242:3001/user/register
+http://192.168.0.242:3001/user/verify-email
+http://192.168.0.242:3001/user/resend-verification
+http://192.168.0.242:3001/user/logout
+```
+
+### User profile (requires authentication)
+```bash
+http://192.168.0.242:3001/user/profile
+```
+
+### Password recovery
+```bash
+http://192.168.0.242:3001/user/forget-password
+http://192.168.0.242:3001/user/reset-password
+```
+
+### User data updates (requires authentication)
+```bash
+http://192.168.0.242:3001/user/change-password
+http://192.168.0.242:3001/user/change-name
+http://192.168.0.242:3001/user/change-lastname
+http://192.168.0.242:3001/user/change-nickname
+```
+
+### IP and Data Reception
+```bash
+http://192.168.0.242:3001/roseta/received-ip  
+http://192.168.0.242:3001/roseta/sensor-data
+```
+
+### Rosette Registration and Management (requires authentication)
+```bash
+http://192.168.0.242:3001/roseta/register  
+http://192.168.0.242:3001/roseta/get-all-rosettes  
+http://192.168.0.242:3001/roseta/change-ubication  
+http://192.168.0.242:3001/roseta/remove-rosette/:mac
+```
+
+
+### Sensor Info and Alerts (requires authentication)
+```bash
+http://192.168.0.242:3001/roseta/sensor/:mac  
+http://192.168.0.242:3001/roseta/alerts/:mac
 ```
 
 ## Deployment
