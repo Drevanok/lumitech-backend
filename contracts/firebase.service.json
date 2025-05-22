@@ -1,0 +1,105 @@
+{
+  "endpoints": [
+    {
+      "name": "Send Sensor Data",
+      "method": "POST",
+      "url": "/firebase/sensor-data",
+      "description": "Envía los datos del sensor (temperatura y humedad) a Firebase.",
+      "request": {
+        "rosette_mac": "AA:BB:CC:DD:EE:FF",
+        "temperature": 25.3,
+        "humidity": 55.8
+      },
+      "requestDto": "SensorData",
+      "response": {
+        "msg": "Datos enviados correctamente a Firebase."
+      },
+      "errors": [
+        {
+          "status": 500,
+          "message": "Error al enviar datos a Firebase."
+        }
+      ],
+      "notes": [
+        "Si la temperatura supera 70°C, se envía una alerta automáticamente."
+      ]
+    },
+    {
+      "name": "Get Sensor Info",
+      "method": "GET",
+      "url": "/firebase/sensor-info/:mac",
+      "description": "Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.",
+      "params": {
+        "mac": "string (MAC address de la roseta)"
+      },
+      "responseDto": "SensorInfoResponse",
+      "response": {
+        "msg": "Datos obtenidos correctamente",
+        "data": {
+          "temperature": {
+            "timestamp": 1684500000000,
+            "valor": 25.3
+          },
+          "humidity": {
+            "timestamp": 1684500000000,
+            "valor": 55.8
+          }
+        }
+      },
+      "errors": [
+        {
+          "status": 404,
+          "message": "No se encontraron datos de sensor para la roseta."
+        },
+        {
+          "status": 500,
+          "message": "Error al recuperar los datos del sensor."
+        }
+      ]
+    },
+    {
+      "name": "Get Alert",
+      "method": "GET",
+      "url": "/firebase/alert/:mac",
+      "description": "Obtiene la alerta actual para la roseta especificada, si existe.",
+      "params": {
+        "mac": "string (MAC address de la roseta)"
+      },
+      "response": {
+        "msg": "Alerta encontrada",
+        "data": {
+          "message": "¡Alerta! Temperatura muy alta: 72°C",
+          "timestamp": 1684500000000
+        }
+      },
+      "responseNoData": {
+        "msg": "No hay alertas para esta roseta.",
+        "data": null
+      },
+      "errors": [
+        {
+          "status": 500,
+          "message": "Error al obtener la alerta de Firebase."
+        }
+      ]
+    }
+  ],
+  "dto": {
+    "SensorData": {
+      "rosette_mac": "string (MAC address de la roseta)",
+      "temperature": "number (temperatura en grados Celsius)",
+      "humidity": "number (humedad en porcentaje)"
+    },
+    "SensorValue": {
+      "timestamp": "number (milisegundos desde epoch)",
+      "valor": "number (valor de la medición)"
+    },
+    "SensorInfoResponse": {
+      "msg": "string",
+      "data": {
+        "temperature": "SensorValue",
+        "humidity": "SensorValue"
+      }
+    }
+  }
+}

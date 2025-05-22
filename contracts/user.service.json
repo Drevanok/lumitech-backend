@@ -1,0 +1,166 @@
+{
+  "endpoints": [
+    {
+      "name": "Crear Usuario",
+      "method": "POST",
+      "url": "/users/register",
+      "description": "Crea un nuevo usuario y envía un correo de verificación.",
+      "request": {
+        "name": "Saúl",
+        "lastName": "Aparicio",
+        "nickName": "saulDev",
+        "email": "saul@correo.com",
+        "password": "miContraseña123"
+      },
+      "response": {
+        "message": "Usuario creado correctamente. Se envió un correo de verificación."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Datos incompletos o inválidos."
+        },
+        {
+          "status": 409,
+          "message": "El usuario ya existe."
+        }
+      ]
+    },
+    {
+      "name": "Verificar Correo",
+      "method": "POST",
+      "url": "/users/verify-email",
+      "description": "Verifica el token enviado por correo y activa la cuenta.",
+      "request": {
+        "token": "tokenDeVerificacion123"
+      },
+      "response": {
+        "message": "Correo verificado correctamente."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Token inválido o expirado."
+        }
+      ]
+    },
+    {
+      "name": "Restablecer Contraseña",
+      "method": "POST",
+      "url": "/users/reset-password",
+      "description": "Permite al usuario establecer una nueva contraseña con un token de recuperación.",
+      "request": {
+        "token": "tokenDeRecuperacion123",
+        "newPassword": "nuevaContraseña456"
+      },
+      "response": {
+        "message": "Contraseña restablecida correctamente."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Token inválido o expirado."
+        },
+        {
+          "status": 404,
+          "message": "Usuario no encontrado."
+        }
+      ]
+    },
+    {
+      "name": "Cambiar Contraseña",
+      "method": "PATCH",
+      "url": "/users/change-password",
+      "description": "Permite a un usuario autenticado cambiar su contraseña.",
+      "request": {
+        "oldPassword": "contraseñaAntigua123",
+        "newPassword": "contraseñaNueva456"
+      },
+      "response": {
+        "message": "Contraseña actualizada correctamente."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Contraseña actual incorrecta."
+        }
+      ]
+    },
+    {
+      "name": "Cambiar Nombre",
+      "method": "PATCH",
+      "url": "/users/change-name",
+      "description": "Cambia el nombre del usuario.",
+      "request": {
+        "name": "Saúl"
+      },
+      "response": {
+        "message": "Nombre actualizado correctamente."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Nombre inválido."
+        }
+      ]
+    },
+    {
+      "name": "Cambiar Apellido",
+      "method": "PATCH",
+      "url": "/users/change-lastname",
+      "description": "Cambia el apellido del usuario.",
+      "request": {
+        "lastName": "Aparicio"
+      },
+      "response": {
+        "message": "Apellido actualizado correctamente."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "Apellido inválido."
+        }
+      ]
+    },
+    {
+      "name": "Cambiar Nickname",
+      "method": "PATCH",
+      "url": "/users/change-nickname",
+      "description": "Cambia el apodo del usuario.",
+      "request": {
+        "nickName": "nuevoNick"
+      },
+      "response": {
+        "message": "Nickname actualizado correctamente."
+      },
+      "errors": [
+        {
+          "status": 400,
+          "message": "El nickName ya está en uso."
+        }
+      ]
+    },
+    {
+      "name": "Logout User",
+      "method": "POST",
+      "url": "/logout",
+      "description": "Cierra la sesión del usuario actual y elimina sus sesiones activas.",
+      "authRequired": true,
+      "request": null,
+      "params": null,
+      "response": {
+        "message": "Sesión cerrada correctamente."
+      },
+      "errors": [
+        {
+          "status": 401,
+          "message": "No autorizado. Token JWT inválido o no proporcionado."
+        },
+        {
+          "status": 500,
+          "message": "Error interno al cerrar la sesión."
+        }
+      ]
+    }
+  ]
+}
