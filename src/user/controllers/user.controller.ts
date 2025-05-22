@@ -8,7 +8,9 @@ import {
   Req,
   Get,
   Patch,
+  Res,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -18,16 +20,14 @@ import {
   ChangePasswordDto,
   ChangeUserLastNameDto,
   ChangeUserNickNameDto,
-  ChangeUserNameDto
+  ChangeUserNameDto,
 } from '../dto/modified-data-user.dto';
 import { JwtPayload } from 'jsonwebtoken';
 import { VerifyEmailTokenDto } from '../dto/verify-email-token.dto';
 
 @Controller('user') // Prefix route
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   //Endpoit to register a user
   @Post('register') // Route register user
@@ -42,7 +42,7 @@ export class UserController {
   //Endpoint to verify email
   @Post('verify-email')
   @HttpCode(HttpStatus.OK) //Return code 200 if response is successful
-  async confirmEmail(@Body() verifyEmailTokenDto: VerifyEmailTokenDto) { 
+  async confirmEmail(@Body() verifyEmailTokenDto: VerifyEmailTokenDto) {
     return await this.userService.confirmUserEmail(verifyEmailTokenDto);
   }
 
@@ -50,10 +50,10 @@ export class UserController {
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   async resendVerification(
-    @Body('email') email: string
-    ):Promise<{msg: string}>{
-      return this.userService.resendVerificationEmail(email);
-    };
+    @Body('email') email: string,
+  ): Promise<{ msg: string }> {
+    return this.userService.resendVerificationEmail(email);
+  }
 
   //Endpoint to get user by uuid
   //after auth/login in authService and authController.
@@ -69,7 +69,6 @@ export class UserController {
     };
   }
 
-
   //Endpoint recover password with email
   @Post('forget-password')
   async forgetPassword(@Body('email') email: string) {
@@ -78,9 +77,7 @@ export class UserController {
 
   //Endpoint save new password with token recover password
   @Post('reset-password')
-  async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto
-  ){
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.userService.resetPassword(resetPasswordDto);
   }
 
@@ -95,7 +92,7 @@ export class UserController {
     const uuid = req.user.uuid;
     return this.userService.changePassword(uuid, changePasswordDto);
   }
-  
+
   //Endpoint user auth service change name
   @Patch('change-name')
   @UseGuards(JwtAuthGuard)
@@ -120,25 +117,34 @@ export class UserController {
     return this.userService.changeUserLastName(uuid, changeUserLastnameDto);
   }
 
-
   //Endpoint user auth service change nickname
   @Patch('change-nickname')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async changeNickName(
-    @Req() req: {user: JwtPayload},
+    @Req() req: { user: JwtPayload },
     @Body() changeUserNickNameDto: ChangeUserNickNameDto,
-  ){
+  ) {
     const uuid = req.user.uuid;
     return this.userService.changeUserNickName(uuid, changeUserNickNameDto);
   }
 
-  //Endpoint use auth service logout
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@Req() req: {user: JwtPayload}): Promise<{message: string}>{
+  async logout(
+    @Req() req: Request & { user: JwtPayload },
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ message: string }> {
     const uuid = req.user.uuid;
+
     await this.userService.logout(uuid);
-    return {message: 'Sesión cerrada exitosamente.'}
+
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return { message: 'Sesión cerrada correctamente.' };
   }
 }

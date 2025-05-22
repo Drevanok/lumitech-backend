@@ -30,7 +30,6 @@ async function lumintechApp() {
     }),
   );
 
-
   //Enable CORS with credentials to allow secure cross-origin cookies (web)
   app.enableCors({
     origin: process.env.FRONT_URL, // example: 'https://app.lumintech.com'
@@ -38,7 +37,7 @@ async function lumintechApp() {
   });
     
   const PORT = process.env.PORT ?? 3001;
-  const HOST = '192.168.0.209';
+  const HOST = '192.168.0.25';
 
   await app.listen(PORT, HOST);
 

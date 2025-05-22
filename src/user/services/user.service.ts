@@ -15,7 +15,7 @@ import {
   ChangePasswordDto,
   ChangeUserLastNameDto,
   ChangeUserNickNameDto,
-  ChangeUserNameDto
+  ChangeUserNameDto,
 } from '../dto/modified-data-user.dto';
 import { UserInfo } from '../../auth/interfaces/user-info.interface';
 import { VerifyEmailTokenDto } from '../dto/verify-email-token.dto';
@@ -61,7 +61,6 @@ export class UserService {
       userUUID,
     ]);
 
-
     //Send verification email
     await this.emailService.sendVerificationEmail(
       userEmail,
@@ -71,7 +70,9 @@ export class UserService {
   }
 
   //service verify user email
-  async confirmUserEmail(verifyEmailTokenDto: VerifyEmailTokenDto): Promise<{ msg: string }> {
+  async confirmUserEmail(
+    verifyEmailTokenDto: VerifyEmailTokenDto,
+  ): Promise<{ msg: string }> {
     const { token } = verifyEmailTokenDto;
     try {
       //validate token
@@ -120,7 +121,7 @@ export class UserService {
   }
 
   //service resend verification email
-  async resendVerificationEmail(email:string): Promise<{msg: string}>{
+  async resendVerificationEmail(email: string): Promise<{ msg: string }> {
     const newToken = uuidv4();
 
     await this.dataSource.query(
@@ -129,24 +130,27 @@ export class UserService {
     );
 
     const [flags] = await this.dataSource.query(
-      'SELECT @found_flag AS found, @verified_flag AS verified, @user_name_out AS userName'
+      'SELECT @found_flag AS found, @verified_flag AS verified, @user_name_out AS userName',
     );
 
-    const {found, verified, userName} = flags;
+    const { found, verified, userName } = flags;
 
-    if(found === 0 || found === '0'){
+    if (found === 0 || found === '0') {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    if(verified === 1 || verified === "1"){
+    if (verified === 1 || verified === '1') {
       throw new BadRequestException('La cuenta ya esta verificada');
     }
 
-    await this.emailService.sendVerificationEmail(email, userName || 'Usuario', newToken);
-    
-    return {msg: 'Correo de verificacion enviado'};
-  };
+    await this.emailService.sendVerificationEmail(
+      email,
+      userName || 'Usuario',
+      newToken,
+    );
 
+    return { msg: 'Correo de verificacion enviado' };
+  }
 
   //service get user profile after authenticate login
   async getUserProfile(uuid: string): Promise<UserInfo> {
@@ -174,18 +178,18 @@ export class UserService {
   //service user generate token to reset password
   async forgetPassword(email: string): Promise<{ msg: string }> {
     const resetToken = uuidv4();
-  
+
     try {
       // Llamar procedimiento sin usar expiration_time
       await this.dataSource.query(
         'CALL generate_reset_token(?, ?, @verified_flag, @found_flag, @user_name)',
         [email, resetToken],
       );
-  
+
       const [result] = await this.dataSource.query(
         'SELECT @verified_flag AS verified, @found_flag AS found, @user_name AS userName',
       );
-  
+
       const { verified, found, userName } = result;
 
       //verify if user exist
@@ -195,26 +199,33 @@ export class UserService {
 
       //verify if account user is verified
       if (verified === 0 || verified === '0') {
-        throw new HttpException('Tu cuenta no está verificada', HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          'Tu cuenta no está verificada',
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       //send email
-      await this.emailService.sendRecoveryEmail(email, userName || 'Usuario', resetToken);
-  
+      await this.emailService.sendRecoveryEmail(
+        email,
+        userName || 'Usuario',
+        resetToken,
+      );
+
       console.log(resetToken);
       return { msg: 'Se ha enviado un enlace de recuperación a tu correo' };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
-  
+
       throw new HttpException(
         'Error al generar el enlace de recuperación',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-  
+
   //service reset password with token
   async resetPassword(
     resetPasswordDto: ResetPasswordDto,
@@ -397,7 +408,16 @@ export class UserService {
   }
 
   //service user authenticate, logout
-  async logout(uuid: string): Promise<void>{
-    await this.dataSource.query('CALL increment_token_version(?)', [uuid])
-  }
+  async logout(uuid: string): Promise<void> {
+  console.log('UUID:', uuid);
+
+  const result = await this.dataSource.query(
+    `DELETE FROM user_session WHERE user_uuid = ?`,
+    [uuid],
+  );
+
+  console.log('Sesiones eliminadas:', result);
+
+  await this.dataSource.query(`CALL increment_token_version(?)`, [uuid]);
+}
 }
