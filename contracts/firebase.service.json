@@ -27,7 +27,7 @@
     {
       "name": "Get Sensor Info",
       "method": "GET",
-      "url": "/firebase/sensor-info/:mac",
+      "url": "/roseta/sensor-info/:mac",
       "description": "Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.",
       "params": {
         "mac": "string (MAC address de la roseta)"
@@ -60,7 +60,7 @@
     {
       "name": "Get Alert",
       "method": "GET",
-      "url": "/firebase/alert/:mac",
+      "url": "/roseta/alert/:mac",
       "description": "Obtiene la alerta actual para la roseta especificada, si existe.",
       "params": {
         "mac": "string (MAC address de la roseta)"

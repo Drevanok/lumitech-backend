@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
@@ -30,6 +29,12 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(RateLimitMiddleware)
-      .forRoutes('*'); // solo afecta a login POST
+      .exclude(
+        { path: 'roseta/received-ip', method: RequestMethod.POST },
+        { path: 'roseta/sensor-data', method: RequestMethod.POST },
+        { path: 'roseta/alerts/:mac', method: RequestMethod.GET },
+        { path: 'roseta/sensor/:mac', method: RequestMethod.GET }
+      )
+      .forRoutes('*');
   }
 }

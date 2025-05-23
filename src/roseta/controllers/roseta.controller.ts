@@ -18,7 +18,6 @@ import { ReceivedIpRosettaDto } from '../dto/received-ip-roseta..dto';
 import { FirebaseService } from '../../firebase/services/firebase.service';
 import { ChangeUbicationDto } from '../dto/modified-data-rosette.dto';
 
-
 @Controller('roseta')
 export class RosetaController {
   constructor(
@@ -110,10 +109,10 @@ export class RosetaController {
   @HttpCode(HttpStatus.OK)
   async deleteRosette(
     @Param('mac') mac: string,
-    @Req() req: {user: JwtPayload}
+    @Req() req: { user: JwtPayload },
   ) {
-   const userUuid = req.user.uuid;
+    const userUuid = req.user.uuid;
 
-   return await this.rosetaService.removeRosette(mac, userUuid)
+    return await this.rosetaService.removeRosette(mac, userUuid);
   }
 }

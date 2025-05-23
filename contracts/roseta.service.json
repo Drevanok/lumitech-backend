@@ -55,7 +55,7 @@
     {
       "name": "Get All Rosettes",
       "method": "GET",
-      "url": "/roseta/all/:uuid",
+      "url": "get-all-rosettes",
       "description": "Obtiene todas las rosetas registradas para un usuario.",
       "params": {
         "uuid": "string (UUID del usuario)"
@@ -84,7 +84,7 @@
     {
       "name": "Change Rosetta Ubication",
       "method": "PUT",
-      "url": "/roseta/ubication/:uuid",
+      "url": "/roseta/change-ubication",
       "description": "Cambia la ubicación de una roseta específica.",
       "params": {
         "uuid": "string (UUID del usuario)"
