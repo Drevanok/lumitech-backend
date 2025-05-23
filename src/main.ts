@@ -37,8 +37,8 @@ async function lumintechApp() {
     credentials: true, // available send cookies
   });
     
-  const PORT = process.env.PORT ?? 3001;
-  const HOST = '192.168.0.242';
+  const PORT = process.env.PORT ?? 3000;
+  const HOST = '192.168.0.25';
 
   await app.listen(PORT, HOST);
 

@@ -11,9 +11,7 @@ export class EmailService {
   constructor() {
     // Config. nodemailer transporter
     this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587', 10), // Default to 587 if undefined
-      secure: false,
+      service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -36,7 +34,6 @@ export class EmailService {
                        <p>Gracias por registrarte en Lumitech. Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
                         <p>copia y pega el token en tu aplicacion para verificar tu cuenta</p>
                        <a>${token}</a>
-                        <p>O copia y pega el siguiente enlace en tu navegador:</p>
                        <p>Si no te registraste en Lumitech, ignora este correo.</p>`,
       });
       //console.log('Mensaje enviado: %s', info.messageId);
@@ -51,7 +48,11 @@ export class EmailService {
     }
   }
 
-  async sendRecoveryEmail(email: string, name: string, resetToken: string): Promise<void> {
+  async sendRecoveryEmail(
+    email: string,
+    name: string,
+    resetToken: string,
+  ): Promise<void> {
     try {
       const info = await this.transporter.sendMail({
         from: `"Lumitech" <${process.env.EMAIL_USER}>`,
