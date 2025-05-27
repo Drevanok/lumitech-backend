@@ -409,15 +409,22 @@ export class UserService {
 
   //service user authenticate, logout
   async logout(uuid: string): Promise<void> {
-  console.log('UUID:', uuid);
+    console.log('UUID:', uuid);
+    
+    try {
+      const result = await this.dataSource.query(
+        `DELETE FROM user_session WHERE user_uuid = ?`,
+        [uuid],
+      );
 
-  const result = await this.dataSource.query(
-    `DELETE FROM user_session WHERE user_uuid = ?`,
-    [uuid],
-  );
+      console.log('Sesiones eliminadas:', result);
 
-  console.log('Sesiones eliminadas:', result);
-
-  await this.dataSource.query(`CALL increment_token_version(?)`, [uuid]);
-}
+      await this.dataSource.query(`CALL increment_token_version(?)`, [uuid]);
+    } catch (error) {
+      throw new HttpException(
+        'Token inválido o expirado',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+  }
 }
