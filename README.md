@@ -82,6 +82,9 @@ src/firebase/lumitech-sensors-firebase-adminsdk-fbsvc-50eb2dd997.json
 ```bash
 http://192.168.0.242:3001/
 ```
+This IP is dynamic, it is configured in the main.ts file.
+
+
 
 
 ### Auth Endpoints
