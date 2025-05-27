@@ -84,8 +84,8 @@ http://192.168.0.242:3001/
 ```
 This IP is dynamic, it is configured in the main.ts file.
 ```bash
-  const PORT = process.env.PORT ?? 3000;
-  const HOST = '192.168.0.25';
+  const PORT = process.env.PORT ?? 3001;
+  const HOST = '192.168.0.242';
 ```
 
 
