@@ -43,7 +43,24 @@ $ pnpm run start:dev
 # production mode
 $ pnpm run start:prod
 ```
-## environment variables - .env
+
+## Technologies Used
+
+- **Node.js** — JavaScript runtime for executing server-side code.
+- **TypeScript** — Strongly typed language that compiles to JavaScript.
+- **NestJS** — Progressive Node.js framework for building scalable server-side applications (primary backend framework, running on Express by default).
+- **Express** — HTTP server framework (used as the main platform for NestJS in your project).
+- **Firebase** — Used for Realtime Database integration and device/user data synchronization.
+- **JWT (JSON Web Tokens)** — For authentication and secure token-based sessions.
+- **Passport** — Middleware for authentication, often used with JWT and local strategies for user login.
+- **MySQL2** — For relational database management and data persistence.
+- **Class-validator & class-transformer** — For DTO validation and object transformation.
+- **BCrypt** — For password hashing and security.
+- **dotenv** — For environment variable management.
+- **Other utilities** — e.g., cookie-parser, qrcode, reflect-metadata, rxjs, uuid, etc.
+- **Testing & Linting** — Jest, ts-jest, supertest, eslint.
+
+## Environment variables - .env
 
 For the project to work correctly, you must create an .env file in the root of the project with the following environment variables:
 ```bash
