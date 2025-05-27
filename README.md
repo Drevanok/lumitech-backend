@@ -144,6 +144,49 @@ http://192.168.0.242:3001/roseta/sensor/:mac
 http://192.168.0.242:3001/roseta/alerts/:mac
 ```
 
+## Project Structure: `src/`
+
+- **app.module.ts**
+  - Main application module where all core modules are imported and configured.
+
+- **main.ts**
+  - Application entry point. Starts the NestJS server instance.
+
+- **auth/**
+  - Handles all authentication and authorization logic.
+    - `auth.module.ts`: Auth module configuration.
+    - `controllers/`: API controllers for authentication endpoints.
+    - `dto/`: Data Transfer Objects for validation and typing.
+    - `guards/`: Auth guards to protect routes (e.g. JWT).
+    - `interfaces/`: TypeScript interfaces related to authentication.
+    - `services/`: Core authentication business logic and services.
+
+- **common/**
+  - Shared utilities, middleware, and constants.
+    - Contains the rate-limiter middleware for controlling request rates per user.
+
+- **firebase/**
+  - Logic for interacting with Firebase services.
+    - `firebase.module.ts`: Firebase module configuration.
+    - `interface/`: TypeScript interfaces for Firebase data structures.
+    - `services/`: Business logic and services for real-time database interactions (e.g. saving and retrieving user/device data).
+
+- **roseta/**
+  - Main logic for "rosetas" (smart devices).
+    - `roseta.module.ts`: Roseta module configuration.
+    - `controllers/`: API controllers for device management endpoints.
+    - `dto/`: Data Transfer Objects for device-related operations.
+    - `interface/`: TypeScript interfaces for device data.
+    - `services/`: Business logic/services for device registration, user association, data transmission, etc.
+
+- **user/**
+  - User management logic.
+    - `user.module.ts`: User module configuration.
+    - `controllers/`: API controllers for user endpoints.
+    - `dto/`: Data Transfer Objects for user data validation and typing.
+    - `services/`: Business logic/services for user management.
+
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
