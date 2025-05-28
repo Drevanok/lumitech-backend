@@ -12,7 +12,6 @@ import { AuthService } from '../services/auth.service';
 import { LoginDto } from '../dto/login.dto';
 import { Response, Request } from 'express';
 
-
 @Controller('user/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -48,7 +47,7 @@ export class AuthController {
   // Endpoint to refresh access_token
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() req: Request) {
+  async refresh(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies['refresh_token'];
 
     if (!refreshToken) {
@@ -58,6 +57,23 @@ export class AuthController {
       );
     }
 
-    return this.authService.refreshToken(refreshToken);
+    const {
+      access_token,
+      refresh_token: newRefreshToken,
+      user,
+    } = await this.authService.refreshToken(refreshToken);
+
+    res.cookie('refresh_token', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'strict',
+    });
+
+    res.status(HttpStatus.OK).json({
+      access_token,
+      refresh_token: newRefreshToken,
+      user,
+    });
   }
 }
