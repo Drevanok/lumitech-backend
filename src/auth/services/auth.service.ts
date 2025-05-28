@@ -233,6 +233,7 @@ export class AuthService {
       uuid: user.uuid,
       tokenVersion: user.token_version,
     };
+    
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
       expiresIn: '7d',
