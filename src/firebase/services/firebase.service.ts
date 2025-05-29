@@ -1,7 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { SensorData, SensorInfoResponse } from '../interface/sensor-data.interface';
-import serviceAccount from '../lumitech-sensors-firebase-adminsdk-fbsvc-50eb2dd997.json';
+import {
+  SensorData,
+  SensorInfoResponse,
+} from '../interface/sensor-data.interface';
+import * as path from 'path';
+
+
+let serviceAccount: admin.ServiceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  const serviceAccountPath = path.join(process.cwd(), 'src/firebase/lumitech-sensors-firebase-adminsdk-fbsvc-50eb2dd997.json');
+  serviceAccount = require(serviceAccountPath);
+}
 
 @Injectable()
 export class FirebaseService {
@@ -11,7 +24,7 @@ export class FirebaseService {
   constructor() {
     if (!admin.apps.length) {
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+        credential: admin.credential.cert(serviceAccount),
         databaseURL: 'https://lumitech-sensors-default-rtdb.firebaseio.com',
       });
     }
@@ -65,7 +78,9 @@ export class FirebaseService {
       timestamp: Date.now(),
     });
 
-    console.log(`Alerta enviada para la roseta ${mac}: Temperatura muy alta: ${temperature}°C`);
+    console.log(
+      `Alerta enviada para la roseta ${mac}: Temperatura muy alta: ${temperature}°C`,
+    );
   }
 
   // service to get sensor information from Firebase
@@ -108,7 +123,7 @@ export class FirebaseService {
   }
 
   // service to get alerts from Firebase
-  async getAlert(mac: string): Promise<{msg: string, data:string | null}> {
+  async getAlert(mac: string): Promise<{ msg: string; data: string | null }> {
     const alertRef = this.db.ref(`alerts/${mac}`);
     const alertSnapshot = await alertRef.once('value');
 
