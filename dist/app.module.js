@@ -61,7 +61,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forRoot({
-                type: 'mariadb',
+                type: 'mysql',
                 host: process.env.DB_HOST,
                 port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
                 username: process.env.DB_USERNAME,

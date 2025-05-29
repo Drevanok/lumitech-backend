@@ -1,4 +1,9 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -11,7 +16,7 @@ dotenv.config();
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mariadb',
+      type: 'mysql',
       host: process.env.DB_HOST,
       port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
       username: process.env.DB_USERNAME,
@@ -33,7 +38,7 @@ export class AppModule implements NestModule {
         { path: 'roseta/received-ip', method: RequestMethod.POST },
         { path: 'roseta/sensor-data', method: RequestMethod.POST },
         { path: 'roseta/alerts/:mac', method: RequestMethod.GET },
-        { path: 'roseta/sensor/:mac', method: RequestMethod.GET }
+        { path: 'roseta/sensor/:mac', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }
