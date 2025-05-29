@@ -3,53 +3,76 @@
     {
       "name": "Login",
       "method": "POST",
-      "url": "/auth/login",
-      "description": "Inicia sesión con email o nickName y contraseña.",
-      "request": {
-        "email": "usuario@correo.com",
-        "nickName": "Usuario123",
-        "password": "miContraseña123"
-      },
-      "response": {
-        "access_token": "jwt_access_token",
-        "refresh_token": "jwt_refresh_token",
-        "user": {
-          "uuid": "1a2b3c4d-1234-5678-9101-abcdef123456",
-          "email": "usuario@correo.com",
-          "token_version": 1
+      "url": "http://192.168.0.242:3001/auth/login",
+      "description": "Inicia sesión con email o nickName y contraseña (uno de los dos, no ambos).",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "email",
+                    "password"
+                  ],
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "password": {
+                      "type": "string"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "nickName",
+                    "password"
+                  ],
+                  "properties": {
+                    "nickName": {
+                      "type": "string"
+                    },
+                    "password": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            },
+            "example": {
+              "email": "usuario@correo.com",
+              "password": "miContraseña123"
+            }
+          }
         }
       },
-      "errors": [
-        {
-          "status": 400,
-          "message": "Email o nickName son requeridos"
-        },
-        {
-          "status": 400,
-          "message": "Password es requerido"
-        },
-        {
-          "status": 404,
-          "message": "El nickName o correo no existen."
-        },
-        {
-          "status": 401,
-          "message": "Contraseña incorrecta."
-        },
-        {
-          "status": 403,
-          "message": "Usuario no verificado."
-        },
-        {
-          "status": 409,
-          "message": "El usuario ya tiene una sesión activa."
+      "responses": {
+        "200": {
+          "description": "Inicio de sesión exitoso",
+          "content": {
+            "application/json": {
+              "example": {
+                "access_token": "jwt_access_token",
+                "refresh_token": "jwt_refresh_token",
+                "user": {
+                  "uuid": "1a2b3c4d-1234-5678-9101-abcdef123456",
+                  "email": "usuario@correo.com",
+                  "token_version": 1
+                }
+              }
+            }
+          }
         }
-      ]
+      }
     },
     {
       "name": "Refresh Token",
       "method": "POST",
-      "url": "/auth/refresh",
+      "url": "http://192.168.0.242:3001/auth/refresh",
       "description": "Renueva el token de acceso y refresh si el token de sesión es válido.",
       "request": {
         "refresh_token": "jwt_refresh_token"

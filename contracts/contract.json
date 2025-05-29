@@ -3,53 +3,76 @@
         {
             "name": "Login",
             "method": "POST",
-            "url": "/auth/login",
-            "description": "Inicia sesión con email o nickName y contraseña.",
-            "request": {
-                "email": "usuario@correo.com",
-                "nickName": "Usuario123",
-                "password": "miContraseña123"
-            },
-            "response": {
-                "access_token": "jwt_access_token",
-                "refresh_token": "jwt_refresh_token",
-                "user": {
-                    "uuid": "1a2b3c4d-1234-5678-9101-abcdef123456",
-                    "email": "usuario@correo.com",
-                    "token_version": 1
+            "url": "http://192.168.0.242:3001/auth/login",
+            "description": "Inicia sesión con email o nickName y contraseña (uno de los dos, no ambos).",
+            "requestBody": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "type": "object",
+                                    "required": [
+                                        "email",
+                                        "password"
+                                    ],
+                                    "properties": {
+                                        "email": {
+                                            "type": "string",
+                                            "format": "email"
+                                        },
+                                        "password": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "type": "object",
+                                    "required": [
+                                        "nickName",
+                                        "password"
+                                    ],
+                                    "properties": {
+                                        "nickName": {
+                                            "type": "string"
+                                        },
+                                        "password": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "example": {
+                            "email": "usuario@correo.com",
+                            "password": "miContraseña123"
+                        }
+                    }
                 }
             },
-            "errors": [
-                {
-                    "status": 400,
-                    "message": "Email o nickName son requeridos"
-                },
-                {
-                    "status": 400,
-                    "message": "Password es requerido"
-                },
-                {
-                    "status": 404,
-                    "message": "El nickName o correo no existen."
-                },
-                {
-                    "status": 401,
-                    "message": "Contraseña incorrecta."
-                },
-                {
-                    "status": 403,
-                    "message": "Usuario no verificado."
-                },
-                {
-                    "status": 409,
-                    "message": "El usuario ya tiene una sesión activa."
+            "responses": {
+                "200": {
+                    "description": "Inicio de sesión exitoso",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "access_token": "jwt_access_token",
+                                "refresh_token": "jwt_refresh_token",
+                                "user": {
+                                    "uuid": "1a2b3c4d-1234-5678-9101-abcdef123456",
+                                    "email": "usuario@correo.com",
+                                    "token_version": 1
+                                }
+                            }
+                        }
+                    }
                 }
-            ]
+            }
         },
         {
             "name": "Refresh Token",
             "method": "POST",
-            "url": "/auth/refresh",
+            "url": "http://192.168.0.242:3001/auth/refresh",
             "description": "Renueva el token de acceso y refresh si el token de sesión es válido.",
             "request": {
                 "refresh_token": "jwt_refresh_token"
@@ -85,14 +108,14 @@
         {
             "name": "Crear Usuario",
             "method": "POST",
-            "url": "/users/register",
+            "url": "http://192.168.0.242:3001/users/register",
             "description": "Crea un nuevo usuario y envía un correo de verificación.",
             "request": {
-                "name": "Saúl",
-                "lastName": "Aparicio",
-                "nickName": "saulDev",
-                "email": "saul@correo.com",
-                "password": "miContraseña123"
+                "userName": "nombreUsuario",
+                "userLastName": "apellidoUsuario",
+                "userNickName": "nickNameUsuario",
+                "userEmail": "correo@correo.gmail.com",
+                "userPassword": "contraseñaSegura123"
             },
             "response": {
                 "message": "Usuario creado correctamente. Se envió un correo de verificación."
@@ -111,7 +134,7 @@
         {
             "name": "Verificar Correo",
             "method": "POST",
-            "url": "/users/verify-email",
+            "url": "http://192.168.0.242:3001/users/verify-email",
             "description": "Verifica el token enviado por correo y activa la cuenta.",
             "request": {
                 "token": "tokenDeVerificacion123"
@@ -129,11 +152,11 @@
         {
             "name": "Restablecer Contraseña",
             "method": "POST",
-            "url": "/users/reset-password",
+            "url": "http://192.168.0.242:3001/users/reset-password",
             "description": "Permite al usuario establecer una nueva contraseña con un token de recuperación.",
             "request": {
-                "token": "tokenDeRecuperacion123",
-                "newPassword": "nuevaContraseña456"
+                "token": "yourtoken",
+                "userNewPassword": "newPassword"
             },
             "response": {
                 "message": "Contraseña restablecida correctamente."
@@ -152,11 +175,11 @@
         {
             "name": "Cambiar Contraseña",
             "method": "PATCH",
-            "url": "/users/change-password",
+            "url": "http://192.168.0.242:3001/users/change-password",
             "description": "Permite a un usuario autenticado cambiar su contraseña.",
             "request": {
-                "oldPassword": "contraseñaAntigua123",
-                "newPassword": "contraseñaNueva456"
+                "currentPassword": "currentPass",
+                "userNewPassword": "newPass"
             },
             "response": {
                 "message": "Contraseña actualizada correctamente."
@@ -171,10 +194,10 @@
         {
             "name": "Cambiar Nombre",
             "method": "PATCH",
-            "url": "/users/change-name",
+            "url": "http://192.168.0.242:3001/users/change-name",
             "description": "Cambia el nombre del usuario.",
             "request": {
-                "name": "Saúl"
+                "userName": "Saúl"
             },
             "response": {
                 "message": "Nombre actualizado correctamente."
@@ -189,10 +212,10 @@
         {
             "name": "Cambiar Apellido",
             "method": "PATCH",
-            "url": "/users/change-lastname",
+            "url": "http://192.168.0.242:3001/users/change-lastname",
             "description": "Cambia el apellido del usuario.",
             "request": {
-                "lastName": "Aparicio"
+                "userLastName": "Aparicio"
             },
             "response": {
                 "message": "Apellido actualizado correctamente."
@@ -207,10 +230,10 @@
         {
             "name": "Cambiar Nickname",
             "method": "PATCH",
-            "url": "/users/change-nickname",
+            "url": "http://192.168.0.242:3001/users/change-nickname",
             "description": "Cambia el apodo del usuario.",
             "request": {
-                "nickName": "nuevoNick"
+                "nickName": "nuevoNickname"
             },
             "response": {
                 "message": "Nickname actualizado correctamente."
@@ -225,7 +248,7 @@
         {
             "name": "Logout User",
             "method": "POST",
-            "url": "/logout",
+            "url": "http://192.168.0.242:3001/user/logout",
             "description": "Cierra la sesión del usuario actual y elimina sus sesiones activas.",
             "authRequired": true,
             "request": null,
@@ -247,7 +270,7 @@
         {
             "name": "Receive Rosetta IP",
             "method": "POST",
-            "url": "/roseta/received-ip",
+            "url": "http://192.168.0.242:3001/roseta/received-ip",
             "description": "Recibe la IP dinámica de la roseta y la almacena.",
             "request": {
                 "rossette_ip": "192.168.0.10"
@@ -270,7 +293,7 @@
         {
             "name": "Register Rosetta",
             "method": "POST",
-            "url": "/roseta/register/:uuid",
+            "url": "http://192.168.0.242:3001/roseta/register/:uuid",
             "description": "Obtiene datos desde la roseta y registra la roseta en base de datos.",
             "params": {
                 "uuid": "string (UUID del usuario)"
@@ -299,7 +322,7 @@
         {
             "name": "Get All Rosettes",
             "method": "GET",
-            "url": "/roseta/all/:uuid",
+            "url": "http://192.168.0.242:3001/roseta/get-all-rosettes",
             "description": "Obtiene todas las rosetas registradas para un usuario.",
             "params": {
                 "uuid": "string (UUID del usuario)"
@@ -313,8 +336,7 @@
                         "rosette_register_date": "2023-01-01T12:00:00Z",
                         "wifi_ssid": "MiRedWifi",
                         "rosette_mac": "AA:BB:CC:DD:EE:FF",
-                        "rosette_ip": "192.168.0.50",
-                        "owner_uuid": "123e4567-e89b-12d3-a456-426614174000"
+                        "rosette_ip": "192.168.0.50"
                     }
                 ]
             },
@@ -328,7 +350,7 @@
         {
             "name": "Change Rosetta Ubication",
             "method": "PUT",
-            "url": "/roseta/ubication/:uuid",
+            "url": "http://192.168.0.242:3001/roseta/change-ubication",
             "description": "Cambia la ubicación de una roseta específica.",
             "params": {
                 "uuid": "string (UUID del usuario)"
@@ -363,10 +385,9 @@
         {
             "name": "Remove Rosetta",
             "method": "DELETE",
-            "url": "/roseta/:uuid/:mac",
+            "url": "http://192.168.0.242:3001/roseta/:uuid/:mac",
             "description": "Elimina una roseta asociada a un usuario.",
             "params": {
-                "uuid": "string (UUID del usuario)",
                 "mac": "string (MAC address de la roseta)"
             },
             "response": {
@@ -382,7 +403,7 @@
         {
             "name": "Send Sensor Data",
             "method": "POST",
-            "url": "/firebase/sensor-data",
+            "url": "http://192.168.0.242:3001/firebase/sensor-data",
             "description": "Envía los datos del sensor (temperatura y humedad) a Firebase.",
             "request": {
                 "rosette_mac": "AA:BB:CC:DD:EE:FF",
@@ -406,7 +427,7 @@
         {
             "name": "Get Sensor Info",
             "method": "GET",
-            "url": "/roseta/sensor-info/:mac",
+            "url": "http://192.168.0.242:3001/roseta/sensor-info/:mac",
             "description": "Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.",
             "params": {
                 "mac": "string (MAC address de la roseta)"
@@ -439,7 +460,7 @@
         {
             "name": "Get Alert",
             "method": "GET",
-            "url": "/roseta/alert/:mac",
+            "url": "http://192.168.0.242:3001/roseta/alert/:mac",
             "description": "Obtiene la alerta actual para la roseta especificada, si existe.",
             "params": {
                 "mac": "string (MAC address de la roseta)"
