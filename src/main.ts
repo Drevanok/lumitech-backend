@@ -4,20 +4,21 @@ import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import express from 'express';
+import { SwaggerModule } from '@nestjs/swagger';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import type { OpenAPIObject } from '@nestjs/swagger';
+import * as yaml from 'js-yaml';
+import * as fs from 'fs';
+import * as path from 'path';
 
 dotenv.config();
 
 async function lumintechApp() {
   const server = express();
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(server),
-  );
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
   app.use(cookieParser());
 
-  // Pipes globales de validación
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -30,19 +31,27 @@ async function lumintechApp() {
     }),
   );
 
-
-  //Enable CORS with credentials to allow secure cross-origin cookies (web)
   app.enableCors({
-    origin: process.env.FRONT_URL, // example: 'https://app.lumintech.com'
-    credentials: true, // available send cookies
+    origin: process.env.FRONT_URL,
+    credentials: true,
   });
-    
+
+
+  const yamlPath = path.join(__dirname, '..', 'swagger', 'swagger.yaml');
+
+
+  const swaggerDocument = yaml.load(
+    fs.readFileSync(yamlPath, 'utf8'),
+  ) as OpenAPIObject;
+
+  SwaggerModule.setup('api-docs', app, swaggerDocument);
+
   const PORT = process.env.PORT ?? 3000;
   const HOST = '192.168.0.25';
 
   await app.listen(PORT, HOST);
-
   console.log(`Servidor NestJS iniciado en http://${HOST}:${PORT}`);
+  console.log(`Swagger disponible en http://${HOST}:${PORT}/api-docs`);
 }
 
 lumintechApp();
