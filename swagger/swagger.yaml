@@ -1,0 +1,797 @@
+openapi: 3.0.0
+info:
+  title: API de lumitech
+  version: 1.0.0
+  description: Endpoints para registro, verificación de correo y restablecimiento de contraseña asi como el manejo de datos de usuario, y dispositivo roseta.
+
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ite-465/lumitech/1.0.0
+  - url: http://192.168.0.25:3000 //local
+  - url: http://192.168.0.242:3001 //production
+
+
+paths:
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Inicia sesión con email o nickName y contraseña (uno de los dos, no ambos).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - email
+                    - password
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                - type: object
+                  required:
+                    - nickName
+                    - password
+                  properties:
+                    nickName:
+                      type: string
+                    password:
+                      type: string
+            example:
+              email: usuario@correo.com
+              password: miContraseña123
+      responses:
+        '200':
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              example:
+                access_token: jwt_access_token
+                refresh_token: jwt_refresh_token
+                user:
+                  uuid: 1a2b3c4d-1234-5678-9101-abcdef123456
+                  email: usuario@correo.com
+                  token_version: 1
+        '400':
+          description: Datos inválidos
+        '401':
+          description: Credenciales incorrectas
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      operationId: refreshToken
+      summary: Renovar Access Token
+      description: Renueva el token de acceso utilizando un refresh token válido.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+            example:
+              refresh_token: jwt_refresh_token
+      responses:
+        '200':
+          description: Token renovado exitosamente
+          content:
+            application/json:
+              example:
+                access_token: nuevo_access_token
+        '401':
+          description: Refresh token inválido o expirado
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: Crea un nuevo usuario y envía un correo de verificación.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userName
+                - userLastName
+                - userNickName
+                - userEmail
+                - userPassword
+              properties:
+                userName:
+                  type: string
+                userLastName:
+                  type: string
+                userNickName:
+                  type: string
+                userEmail:
+                  type: string
+                  format: email
+                userPassword:
+                  type: string
+            example:
+              userName: nombreUsuario
+              userLastName: apellidoUsuario
+              userNickName: nickNameUsuario
+              userEmail: correo@correo.gmail.com
+              userPassword: contraseñaSegura123
+      responses:
+        '200':
+          description: Usuario creado correctamente
+          content:
+            application/json:
+              example:
+                message: Usuario creado correctamente. Se envió un correo de verificación.
+        '400':
+          description: Datos incompletos o inválidos
+        '409':
+          description: El usuario ya existe
+
+  /users/verify-email:
+    post:
+      tags:
+        - Users
+      summary: Verifica el token enviado por correo y activa la cuenta.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+            example:
+              token: tokenDeVerificacion123
+      responses:
+        '200':
+          description: Correo verificado correctamente
+          content:
+            application/json:
+              example:
+                message: Correo verificado correctamente.
+        '400':
+          description: Token inválido o expirado
+
+  /users/reset-password:
+    post:
+      tags:
+        - Users
+      summary: Establece una nueva contraseña con un token de recuperación.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - userNewPassword
+              properties:
+                token:
+                  type: string
+                userNewPassword:
+                  type: string
+            example:
+              token: yourtoken
+              userNewPassword: newPassword
+      responses:
+        '200':
+          description: Contraseña restablecida correctamente
+          content:
+            application/json:
+              example:
+                message: Contraseña restablecida correctamente.
+        '400':
+          description: Token inválido o expirado
+        '404':
+          description: Usuario no encontrado
+          
+
+  /users/profile/{uuid}:
+    get:
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      summary: Obtener Perfil de Usuario
+      description: Obtiene el perfil del usuario por UUID.
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 1a2b3c4d-1234-5678-9101-abcdef123456
+      responses:
+        '200':
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  userLastName:
+                    type: string
+                  verify:
+                    type: boolean
+                  email:
+                    type: string
+                  userNickName:
+                    type: string
+        '404':
+          description: Usuario no encontrado
+
+  /users/change-password:
+    patch:
+      tags:
+        - Users
+      summary: Cambiar Contraseña
+      description: Permite a un usuario autenticado cambiar su contraseña.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                userNewPassword:
+                  type: string
+      responses:
+        '200':
+          description: Contraseña actualizada correctamente
+        '400':
+          description: Contraseña actual incorrecta
+
+  /users/change-name:
+    patch:
+      tags:
+        - Users
+      summary: Cambiar Nombre
+      description: Cambia el nombre del usuario.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userName:
+                  type: string
+      responses:
+        '200':
+          description: Nombre actualizado correctamente
+        '400':
+          description: Nombre inválido
+
+  /users/change-lastname:
+    patch:
+      tags:
+        - Users
+      summary: Cambiar Apellido
+      description: Cambia el apellido del usuario.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userLastName:
+                  type: string
+      responses:
+        '200':
+          description: Apellido actualizado correctamente
+        '400':
+          description: Apellido inválido
+
+  /users/change-nickname:
+    patch:
+      tags:
+        - Users
+      summary: Cambiar Nickname
+      description: Cambia el apodo del usuario.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickName:
+                  type: string
+      responses:
+        '200':
+          description: Nickname actualizado correctamente
+        '400':
+          description: El nickName ya está en uso
+          
+  /set-wifi-credentials:
+    post:
+      tags:
+        - Device - WiFi
+      summary: Establecer credenciales WiFi
+      description: Configura el SSID y la contraseña de la red WiFi a la que se conectará el dispositivo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - wifi_ssid
+                - wifi_password
+              properties:
+                wifi_ssid:
+                  type: string
+                  example: TELNOR-231416
+                wifi_password:
+                  type: string
+                  example: /ite*1984-
+      responses:
+        '200':
+          description: Credenciales WiFi configuradas correctamente.
+          content:
+            application/json:
+              example:
+                message: WiFi configurado correctamente.
+        '400':
+          description: Datos inválidos.
+          content:
+            application/json:
+              example:
+                message: SSID o contraseña no válidos.
+        '500':
+          description: Error interno del dispositivo.
+          content:
+            application/json:
+              example:
+                message: No se pudo aplicar la configuración.
+  /roseta/received-ip:
+    post:
+      tags:
+        - Device - Rosetta
+      summary: Receive Rosetta IP
+      description: Recibe la IP dinámica de la roseta y la almacena.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceivedIpRosettaDto'
+      responses:
+        '200':
+          description: IP de la roseta recibida correctamente
+          content:
+            application/json:
+              example:
+                msg: IP de la roseta recibida correctamente
+        '400':
+          description: Error en la petición
+          content:
+            application/json:
+              examples:
+                ip_invalida:
+                  value:
+                    message: La dirección IP debe ser IPv4 y no es válida.
+                ip_requerida:
+                  value:
+                    message: rossette_ip es requerido
+
+  /roseta/register/{uuid}:
+    post:
+      tags:
+        - Device - Rosetta
+      summary: Register Rosetta
+      description: Registra la roseta con datos recibidos desde ESP32.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Roseta registrada correctamente
+          content:
+            application/json:
+              example:
+                msg: Roseta registrada correctamente
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              example:
+                message: Los datos recibidos del ESP32 no son válidos.
+        '500':
+          description: Error interno
+          content:
+            application/json:
+              example:
+                message: Error al registrar la roseta.
+                
+  /roseta/change-ubication:
+    put:
+      tags:
+        - Device - Rosetta
+      summary: Change Rosetta Ubication
+      description: Cambia la ubicación de una roseta específica.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeUbicationDto'
+      responses:
+        '200':
+          description: Ubicación de roseta actualizada exitosamente
+          content:
+            application/json:
+              example:
+                msg: Ubicación de roseta actualizada exitosamente
+        '400':
+          description: Error en la petición
+          content:
+            application/json:
+              examples:
+                mac_invalida:
+                  value:
+                    message: La dirección MAC no es válida.
+                ubicacion_vacia:
+                  value:
+                    message: La ubicación no puede estar vacía.
+                error_actualizar:
+                  value:
+                    message: No se pudo actualizar la ubicación.
+        '500':
+          description: Error interno
+          content:
+            application/json:
+              example:
+                message: Error al cambiar la ubicación de la roseta.
+                
+  /roseta/get-all-rosettes:
+    get:
+      tags:
+        - Device - Rosetta
+      summary: Get All Rosettes
+      description: Obtiene todas las rosetas registradas para un usuario.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rosetas obtenidas correctamente
+          content:
+            application/json:
+              example:
+                msg: Rosetas obtenidas correctamente
+                data:
+                  - rosette_id: 1
+                    rosette_ubication: Oficina Principal
+                    rosette_register_date: 2023-01-01T12:00:00Z
+                    wifi_ssid: MiRedWifi
+                    rosette_mac: AA:BB:CC:DD:EE:FF
+                    rosette_ip: 192.168.0.10
+        '500':
+          description: Error al obtener las rosetas
+          content:
+            application/json:
+              example:
+                message: Error al obtener las rosetas del usuario.
+  /roseta/{uuid}/{mac}:
+    delete:
+      tags:
+        - Device - Rosetta
+      summary: Remove Rosetta
+      description: Elimina una roseta asociada a un usuario.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: mac
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Roseta eliminada correctamente
+          content:
+            application/json:
+              example:
+                msg: Roseta eliminada correctamente
+        '500':
+          description: Error interno
+          content:
+            application/json:
+              example:
+                message: Error interno al intentar eliminar esta roseta.
+                
+  /firebase/sensor-data:
+    post:
+      tags:
+        - Firebase - Sensor
+      summary: Enviar datos del sensor a Firebase
+      description: Envía los datos del sensor (temperatura y humedad) a Firebase. Si la temperatura supera 70°C, se envía una alerta automáticamente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensorData'
+      responses:
+        '200':
+          description: Datos enviados correctamente a Firebase.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Datos enviados correctamente a Firebase.
+        '500':
+          description: Error al enviar datos a Firebase.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error al enviar datos a Firebase.
+      security:
+        - bearerAuth: []
+        
+  /roseta/sensor-info/{mac}:
+    get:
+      tags:
+        - Firebase - Sensor
+      summary: Obtener información del sensor desde Firebase
+      description: Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          schema:
+            type: string
+          description: MAC address de la roseta
+      responses:
+        '200':
+          description: Datos obtenidos correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SensorInfoResponse'
+        '404':
+          description: No se encontraron datos de sensor para la roseta.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No se encontraron datos de sensor para la roseta.
+        '500':
+          description: Error al recuperar los datos del sensor.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error al recuperar los datos del sensor.
+      security:
+        - bearerAuth: []
+        
+  /roseta/alert/{mac}:
+    get:
+      tags:
+        - Firebase - Alert Sensor
+      summary: Obtener alerta actual para la roseta
+      description: Obtiene la alerta actual para la roseta especificada, si existe.
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          schema:
+            type: string
+          description: MAC address de la roseta
+      responses:
+        '200':
+          description: Alerta encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: Alerta encontrada
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "¡Alerta! Temperatura muy alta: 72°C"
+                      timestamp:
+                        type: integer
+                        example: 1684500000000
+        '204':
+          description: No hay alertas para esta roseta.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: No hay alertas para esta roseta.
+                  data:
+                    nullable: true
+                    example: null
+        '500':
+          description: Error al obtener la alerta de Firebase.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error al obtener la alerta de Firebase.
+      security:
+        - bearerAuth: []
+        
+  /user/logout:
+    post:
+      tags:
+        - User
+      summary: Logout User
+      description: Cierra la sesión del usuario actual y elimina sus sesiones activas.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sesión cerrada correctamente
+        '401':
+          description: No autorizado. Token JWT inválido o no proporcionado.
+        '500':
+          description: Error interno al cerrar la sesión
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SensorData:
+      type: object
+      required:
+        - rosette_mac
+        - temperature
+        - humidity
+      properties:
+        rosette_mac:
+          type: string
+          description: MAC address de la roseta
+          example: AA:BB:CC:DD:EE:FF
+        temperature:
+          type: number
+          format: float
+          description: Temperatura en grados Celsius
+          example: 25.3
+        humidity:
+          type: number
+          format: float
+          description: Humedad en porcentaje
+          example: 55.8
+
+    SensorValue:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          description: Milisegundos desde epoch
+          example: 1684500000000
+        valor:
+          type: number
+          format: float
+          description: Valor de la medición
+          example: 25.3
+
+    SensorInfoResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Datos obtenidos correctamente
+        data:
+          type: object
+          properties:
+            temperature:
+              $ref: '#/components/schemas/SensorValue'
+            humidity:
+              $ref: '#/components/schemas/SensorValue'
+
+    ReceivedIpRosettaDto:
+      type: object
+      required:
+        - rossette_ip
+      properties:
+        rossette_ip:
+          type: string
+          format: ipv4
+          description: IP dinámica de la roseta
+          example: 192.168.1.101
+
+    ChangeUbicationDto:
+      type: object
+      required:
+        - mac_address
+        - ubication
+      properties:
+        mac_address:
+          type: string
+          description: Dirección MAC de la roseta
+          example: "00:1B:44:11:3A:B7"
+        ubication:
+          type: string
+          description: Nueva ubicación física
+          example: "Edificio A, Piso 2, Oficina 204"
