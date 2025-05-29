@@ -47,7 +47,7 @@ async function lumintechApp() {
   SwaggerModule.setup('api-docs', app, swaggerDocument);
 
   const PORT = process.env.PORT ?? 3000;
-  const HOST = '192.168.0.25';
+  const HOST = process.env.HOST ?? '0.0.0.0';
 
   await app.listen(PORT, HOST);
   console.log(`Servidor NestJS iniciado en http://${HOST}:${PORT}`);
