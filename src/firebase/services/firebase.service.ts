@@ -49,7 +49,7 @@ export class FirebaseService {
 
   // Method to check if the temperature exceeds the threshold and send an alert
   private async checkAndSendAlert(mac: string, temperature: number) {
-    const threshold = 70; // Establecer umbral en 70°C
+    const threshold = 55; // Establecer umbral en 70°C
 
     // If the temperature exceeds the threshold, send an alert
     if (temperature > threshold) {
