@@ -3,7 +3,7 @@
     {
       "name": "Send Sensor Data",
       "method": "POST",
-      "url": "/firebase/sensor-data",
+      "url": "http://192.168.0.242:3001/firebase/sensor-data",
       "description": "Envía los datos del sensor (temperatura y humedad) a Firebase.",
       "request": {
         "rosette_mac": "AA:BB:CC:DD:EE:FF",
@@ -27,7 +27,7 @@
     {
       "name": "Get Sensor Info",
       "method": "GET",
-      "url": "/roseta/sensor-info/:mac",
+      "url": "http://192.168.0.242:3001/roseta/sensor-info/:mac",
       "description": "Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.",
       "params": {
         "mac": "string (MAC address de la roseta)"
@@ -60,7 +60,7 @@
     {
       "name": "Get Alert",
       "method": "GET",
-      "url": "/roseta/alert/:mac",
+      "url": "http://192.168.0.242:3001/roseta/alert/:mac",
       "description": "Obtiene la alerta actual para la roseta especificada, si existe.",
       "params": {
         "mac": "string (MAC address de la roseta)"

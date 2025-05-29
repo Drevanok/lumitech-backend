@@ -7,7 +7,7 @@ import { Request, Response, NextFunction } from 'express';
 export class RateLimitMiddleware implements NestMiddleware {
   private limiter = rateLimit({
     windowMs: 1 * 60 * 1000,
-    max: 5,
+    max: 30,
     message: {
       statusCode: 429,
       message: 'Demasiadas peticiones. Intenta de nuevo más tarde.',

@@ -1,4 +1,3 @@
-
 openapi: 3.0.0
 info:
   title: API de lumitech
@@ -12,7 +11,6 @@ servers:
   - url: http://192.168.0.25:3000 //local
 
 paths:
-
   /auth/login:
     post:
       tags:
@@ -67,10 +65,11 @@ paths:
     post:
       tags:
         - Auth
-      summary: Renovar Access Token
-      description: Renueva el token de acceso utilizando un refresh token válido.
       security:
         - bearerAuth: []
+      operationId: refreshToken
+      summary: Renovar Access Token
+      description: Renueva el token de acceso utilizando un refresh token válido.
       requestBody:
         required: true
         content:
@@ -96,7 +95,7 @@ paths:
   /users/register:
     post:
       tags:
-        - User
+        - Users
       summary: Crea un nuevo usuario y envía un correo de verificación.
       requestBody:
         required: true
@@ -143,7 +142,7 @@ paths:
   /users/verify-email:
     post:
       tags:
-        - User
+        - Users
       summary: Verifica el token enviado por correo y activa la cuenta.
       requestBody:
         required: true
@@ -171,7 +170,7 @@ paths:
   /users/reset-password:
     post:
       tags:
-        - User
+        - Users
       summary: Establece una nueva contraseña con un token de recuperación.
       requestBody:
         required: true
@@ -206,11 +205,11 @@ paths:
   /users/profile/{uuid}:
     get:
       tags:
-        - User
-      summary: Obtener Perfil de Usuario
-      description: Obtiene el perfil del usuario por UUID.
+        - Users
       security:
         - bearerAuth: []
+      summary: Obtener Perfil de Usuario
+      description: Obtiene el perfil del usuario por UUID.
       parameters:
         - name: uuid
           in: path
@@ -242,7 +241,7 @@ paths:
   /users/change-password:
     patch:
       tags:
-        - User
+        - Users
       summary: Cambiar Contraseña
       description: Permite a un usuario autenticado cambiar su contraseña.
       security:
@@ -267,7 +266,7 @@ paths:
   /users/change-name:
     patch:
       tags:
-        - User
+        - Users
       summary: Cambiar Nombre
       description: Cambia el nombre del usuario.
       security:
@@ -290,7 +289,7 @@ paths:
   /users/change-lastname:
     patch:
       tags:
-        - User
+        - Users
       summary: Cambiar Apellido
       description: Cambia el apellido del usuario.
       security:
@@ -313,7 +312,7 @@ paths:
   /users/change-nickname:
     patch:
       tags:
-        - User
+        - Users
       summary: Cambiar Nickname
       description: Cambia el apodo del usuario.
       security:
@@ -336,7 +335,7 @@ paths:
   /set-wifi-credentials:
     post:
       tags:
-        - Device
+        - Device - WiFi
       summary: Establecer credenciales WiFi
       description: Configura el SSID y la contraseña de la red WiFi a la que se conectará el dispositivo.
       requestBody:
@@ -377,7 +376,7 @@ paths:
   /roseta/received-ip:
     post:
       tags:
-        - Device
+        - Device - Rosetta
       summary: Receive Rosetta IP
       description: Recibe la IP dinámica de la roseta y la almacena.
       security:
@@ -406,10 +405,11 @@ paths:
                 ip_requerida:
                   value:
                     message: rossette_ip es requerido
+
   /roseta/register/{uuid}:
     post:
       tags:
-        - Device
+        - Device - Rosetta
       summary: Register Rosetta
       description: Registra la roseta con datos recibidos desde ESP32.
       security:
@@ -443,7 +443,7 @@ paths:
   /roseta/change-ubication:
     put:
       tags:
-        - Device
+        - Device - Rosetta
       summary: Change Rosetta Ubication
       description: Cambia la ubicación de una roseta específica.
       security:
@@ -491,7 +491,7 @@ paths:
   /roseta/get-all-rosettes:
     get:
       tags:
-        - Device
+        - Device - Rosetta
       summary: Get All Rosettes
       description: Obtiene todas las rosetas registradas para un usuario.
       security:
@@ -525,7 +525,7 @@ paths:
   /roseta/{uuid}/{mac}:
     delete:
       tags:
-        - Device
+        - Device - Rosetta
       summary: Remove Rosetta
       description: Elimina una roseta asociada a un usuario.
       security:
@@ -558,7 +558,7 @@ paths:
   /firebase/sensor-data:
     post:
       tags:
-        - Device - Firebase
+        - Firebase - Sensor
       summary: Enviar datos del sensor a Firebase
       description: Envía los datos del sensor (temperatura y humedad) a Firebase. Si la temperatura supera 70°C, se envía una alerta automáticamente.
       requestBody:
@@ -594,7 +594,7 @@ paths:
   /roseta/sensor-info/{mac}:
     get:
       tags:
-        - Device - Firebase
+        - Firebase - Sensor
       summary: Obtener información del sensor desde Firebase
       description: Obtiene la información de temperatura y humedad desde Firebase para la roseta especificada.
       parameters:
@@ -637,7 +637,7 @@ paths:
   /roseta/alert/{mac}:
     get:
       tags:
-        - Device - Firebase
+        - Firebase - Alert Sensor
       summary: Obtener alerta actual para la roseta
       description: Obtiene la alerta actual para la roseta especificada, si existe.
       parameters:
@@ -696,7 +696,7 @@ paths:
   /user/logout:
     post:
       tags:
-        - User
+        - Users
       summary: Logout User
       description: Cierra la sesión del usuario actual y elimina sus sesiones activas.
       security:

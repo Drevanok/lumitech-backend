@@ -3,14 +3,14 @@
     {
       "name": "Crear Usuario",
       "method": "POST",
-      "url": "/users/register",
+      "url": "http://192.168.0.242:3001/users/register",
       "description": "Crea un nuevo usuario y envía un correo de verificación.",
       "request": {
-        "name": "Saúl",
-        "lastName": "Aparicio",
-        "nickName": "saulDev",
-        "email": "saul@correo.com",
-        "password": "miContraseña123"
+        "userName": "nombreUsuario",
+        "userLastName": "apellidoUsuario",
+        "userNickName": "nickNameUsuario",
+        "userEmail": "correo@correo.gmail.com",
+        "userPassword": "contraseñaSegura123"
       },
       "response": {
         "message": "Usuario creado correctamente. Se envió un correo de verificación."
@@ -29,7 +29,7 @@
     {
       "name": "Verificar Correo",
       "method": "POST",
-      "url": "/users/verify-email",
+      "url": "http://192.168.0.242:3001/users/verify-email",
       "description": "Verifica el token enviado por correo y activa la cuenta.",
       "request": {
         "token": "tokenDeVerificacion123"
@@ -47,11 +47,11 @@
     {
       "name": "Restablecer Contraseña",
       "method": "POST",
-      "url": "/users/reset-password",
+      "url": "http://192.168.0.242:3001/users/reset-password",
       "description": "Permite al usuario establecer una nueva contraseña con un token de recuperación.",
       "request": {
-        "token": "tokenDeRecuperacion123",
-        "newPassword": "nuevaContraseña456"
+        "token": "yourtoken",
+        "userNewPassword": "newPassword"
       },
       "response": {
         "message": "Contraseña restablecida correctamente."
@@ -68,13 +68,39 @@
       ]
     },
     {
+      "name": "Obtener Perfil de Usuario",
+      "method": "GET",
+      "url": "http://192.168.0.242:3001/users/profile/{uuid}",
+      "description": "Obtiene el perfil del usuario por UUID.",
+      "pathParams": {
+        "uuid": {
+          "type": "string",
+          "example": "1a2b3c4d-1234-5678-9101-abcdef123456"
+        }
+      },
+      "response": {
+        "name": "Saúl",
+        "userLastName": "Aparicio",
+        "verify": true,
+        "email": "saul@correo.com",
+        "userNickName": "saul123"
+      },
+      "errors": [
+        {
+          "status": 404,
+          "message": "Usuario no encontrado."
+        }
+      ]
+    },
+    {
       "name": "Cambiar Contraseña",
       "method": "PATCH",
-      "url": "/users/change-password",
+      "url": "http://192.168.0.242:3001/users/change-password",
       "description": "Permite a un usuario autenticado cambiar su contraseña.",
+      "authRequired": true,
       "request": {
-        "oldPassword": "contraseñaAntigua123",
-        "newPassword": "contraseñaNueva456"
+        "currentPassword": "currentPass",
+        "userNewPassword": "newPass"
       },
       "response": {
         "message": "Contraseña actualizada correctamente."
@@ -89,10 +115,11 @@
     {
       "name": "Cambiar Nombre",
       "method": "PATCH",
-      "url": "/users/change-name",
+      "url": "http://192.168.0.242:3001/users/change-name",
       "description": "Cambia el nombre del usuario.",
+      "authRequired": true,
       "request": {
-        "name": "Saúl"
+        "userName": "Saúl"
       },
       "response": {
         "message": "Nombre actualizado correctamente."
@@ -107,10 +134,11 @@
     {
       "name": "Cambiar Apellido",
       "method": "PATCH",
-      "url": "/users/change-lastname",
+      "url": "http://192.168.0.242:3001/users/change-lastname",
       "description": "Cambia el apellido del usuario.",
+      "authRequired": true,
       "request": {
-        "lastName": "Aparicio"
+        "userLastName": "Aparicio"
       },
       "response": {
         "message": "Apellido actualizado correctamente."
@@ -125,10 +153,11 @@
     {
       "name": "Cambiar Nickname",
       "method": "PATCH",
-      "url": "/users/change-nickname",
+      "url": "http://192.168.0.242:3001/users/change-nickname",
       "description": "Cambia el apodo del usuario.",
+      "authRequired": true,
       "request": {
-        "nickName": "nuevoNick"
+        "nickName": "nuevoNickname"
       },
       "response": {
         "message": "Nickname actualizado correctamente."
@@ -143,7 +172,7 @@
     {
       "name": "Logout User",
       "method": "POST",
-      "url": "/logout",
+      "url": "http://192.168.0.242:3001/user/logout",
       "description": "Cierra la sesión del usuario actual y elimina sus sesiones activas.",
       "authRequired": true,
       "request": null,

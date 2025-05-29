@@ -1,10 +1,72 @@
 {
   "endpoints": [
     {
+      "name": "Establecer credenciales WiFi",
+      "method": "POST",
+      "url": "http://192.168.4.1/set-wifi-credentials",
+      "description": "Configura el SSID y la contraseña de la red WiFi a la que se conectará el dispositivo.",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "wifi_ssid",
+                "wifi_password"
+              ],
+              "properties": {
+                "wifi_ssid": {
+                  "type": "string",
+                  "example": "TELNOR-231416"
+                },
+                "wifi_password": {
+                  "type": "string",
+                  "example": "/ite*1984-"
+                }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Credenciales WiFi configuradas correctamente.",
+          "content": {
+            "application/json": {
+              "example": {
+                "message": "WiFi configurado correctamente."
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Datos inválidos.",
+          "content": {
+            "application/json": {
+              "example": {
+                "message": "SSID o contraseña no válidos."
+              }
+            }
+          }
+        },
+        "500": {
+          "description": "Error interno del dispositivo.",
+          "content": {
+            "application/json": {
+              "example": {
+                "message": "No se pudo aplicar la configuración."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
       "name": "Receive Rosetta IP",
       "method": "POST",
-      "url": "/roseta/received-ip",
+      "url": "http://192.168.0.242:3001/roseta/received-ip",
       "description": "Recibe la IP dinámica de la roseta y la almacena.",
+      "authRequired": true,
       "request": {
         "rossette_ip": "192.168.0.10"
       },
@@ -26,8 +88,9 @@
     {
       "name": "Register Rosetta",
       "method": "POST",
-      "url": "/roseta/register/:uuid",
+      "url": "http://192.168.0.242:3001/roseta/register/:uuid",
       "description": "Obtiene datos desde la roseta y registra la roseta en base de datos.",
+      "authRequired": true,
       "params": {
         "uuid": "string (UUID del usuario)"
       },
@@ -55,8 +118,9 @@
     {
       "name": "Get All Rosettes",
       "method": "GET",
-      "url": "get-all-rosettes",
+      "url": "http://192.168.0.242:3001/roseta/get-all-rosettes",
       "description": "Obtiene todas las rosetas registradas para un usuario.",
+      "authRequired": true,
       "params": {
         "uuid": "string (UUID del usuario)"
       },
@@ -69,8 +133,7 @@
             "rosette_register_date": "2023-01-01T12:00:00Z",
             "wifi_ssid": "MiRedWifi",
             "rosette_mac": "AA:BB:CC:DD:EE:FF",
-            "rosette_ip": "192.168.0.50",
-            "owner_uuid": "123e4567-e89b-12d3-a456-426614174000"
+            "rosette_ip": "192.168.0.50"
           }
         ]
       },
@@ -84,8 +147,9 @@
     {
       "name": "Change Rosetta Ubication",
       "method": "PUT",
-      "url": "/roseta/change-ubication",
+      "url": "http://192.168.0.242:3001/roseta/change-ubication",
       "description": "Cambia la ubicación de una roseta específica.",
+      "authRequired": true,
       "params": {
         "uuid": "string (UUID del usuario)"
       },
@@ -119,10 +183,10 @@
     {
       "name": "Remove Rosetta",
       "method": "DELETE",
-      "url": "/roseta/:uuid/:mac",
+      "url": "http://192.168.0.242:3001/roseta/:uuid/:mac",
       "description": "Elimina una roseta asociada a un usuario.",
+      "authRequired": true,
       "params": {
-        "uuid": "string (UUID del usuario)",
         "mac": "string (MAC address de la roseta)"
       },
       "response": {

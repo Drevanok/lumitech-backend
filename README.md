@@ -95,14 +95,66 @@ The project uses Firebase Admin for certain functionalities. To do this, you nee
 src/firebase/lumitech-sensors-firebase-adminsdk-fbsvc-50eb2dd997.json
 ```
 ## Endpoints
+
 ### Base URL
 ```bash
 http://192.168.0.242:3001/
 ```
-This IP is dynamic, it is configured in the main.ts file.
+
+## Customize your IP in `main.ts`
+
+```typescript
+const PORT = process.env.PORT ?? 3000;
+const HOST = '192.168.0.25';
+
+await app.listen(PORT, HOST);
+console.log(`NestJS server started at http://${HOST}:${PORT}`);
+console.log(`Swagger available at http://${HOST}:${PORT}/api-docs`);
+```
+
+## After running the project successfully, you should see a response like this
 ```bash
-const PORT = process.env.PORT ?? 3001;
-const HOST = '192.168.0.242';
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [NestFactory] Starting Nest application...
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] AppModule dependencies initialized +86ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] TypeOrmModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] TypeOrmModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] FirebaseModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] JwtModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] JwtModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] HttpModule dependencies initialized +1ms
+query: SELECT VERSION() AS `version`
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] TypeOrmCoreModule dependencies initialized +15ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] UserModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [InstanceLoader] RosetaModule dependencies initialized +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RoutesResolver] UserController {/user}: +20ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/register, POST} route +3ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/verify-email, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/resend-verification, POST} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/profile, GET} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/forget-password, POST} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/reset-password, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/change-password, PATCH} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/change-name, PATCH} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/change-lastname, PATCH} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/change-nickname, PATCH} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/logout, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RoutesResolver] AuthController {/user/auth}: +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/auth/login, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/user/auth/refresh, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RoutesResolver] RosetaController {/roseta}: +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/received-ip, POST} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/register, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/get-all-rosettes, GET} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/sensor-data, POST} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/sensor/:mac, GET} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/alerts/:mac, GET} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/change-ubication, PATCH} route +0ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [RouterExplorer] Mapped {/roseta/remove-rosette/:mac, DELETE} route +1ms
+[Nest] 220970  - 05/29/2025, 12:11:24 AM     LOG [NestApplication] Nest application successfully started +2ms
+NestJS server started at http://{your_ip}:{your_port}
+Swagger available at http://{your_ip}:{your_port}/api-docs
 ```
 
 
@@ -161,6 +213,40 @@ http://192.168.0.242:3001/roseta/sensor/:mac
 http://192.168.0.242:3001/roseta/alerts/:mac
 ```
 
+## API Documentation (Swagger)
+
+This project includes an OpenAPI (Swagger) specification file to document and test the available endpoints.
+
+## Location of Swagger File
+
+After cloning or setting up the project, the Swagger file can be found at:
+```
+swagger/swagger.yaml
+```
+
+## Server Configuration in Swagger
+
+Inside `swagger.yaml`, you’ll find the `servers` section that lists available environments:
+
+```yaml
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ite-465/lumitech/1.0.0
+  - url: http://192.168.0.25:3000 # local
+```
+
+## Customizing Server URLs
+
+You must update the IP addresses in this section depending on your machine or deployment environment.
+
+**Example:**
+
+If your local IP address is `192.168.1.100` and your server is running on port `3000`, change the local URL to:
+
+```yaml
+- url: http://192.168.1.100:3000 # local
+```
+
 ## Project Structure: `src/`
 
 - **app.module.ts**
@@ -202,6 +288,8 @@ http://192.168.0.242:3001/roseta/alerts/:mac
     - `controllers/`: API controllers for user endpoints.
     - `dto/`: Data Transfer Objects for user data validation and typing.
     - `services/`: Business logic/services for user management.
+
+
 
 
 ## Deployment
